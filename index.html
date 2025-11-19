@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebWay - Demo Campus</title>
+  <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+  <header>
+    <h1>WebWay - Navegación Campus</h1>
+    <p>Selecciona tu destino y elige el modo</p>
+  </header>
+
+  <main>
+    <section class="selection-panel">
+      <label for="destino">Destino:</label>
+      <select id="destino">
+        <option value="">-- Selecciona un lugar --</option>
+      </select>
+      
+      <div class="button-group">
+        <button id="btnMap" class="btn btn-secondary">Ver Mapa</button>
+        <button id="btnAR" class="btn btn-primary">Modo AR con Orientación</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Demo de orientación con Giroscopio y GPS</p>
+  </footer>
+
+  <script type="module">
+    import { loadPois, populateDestSelectInIndex } from './scripts/app.js';
+
+    class App {
+      constructor() {
+        this.lugares = [];
+        this.init();
+      }
+
+      async init() {
+        try {
+          await this.cargarLugares();
+          this.configurarInterfaz();
+        } catch (error) {
+          this.mostrarError('Error al cargar los destinos: ' + error.message);
+        }
+      }
+
+      async cargarLugares() {
+        try {
+          this.lugares = await loadPois();
+        } catch (error) {
+          console.error('Error cargando lugares:', error);
+          // Datos de respaldo
+          this.lugares = [
+            { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797 },
+            { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924 },
+            { "id": 4, "name": "Bloque F", "lat": 4.6611701025415, "lon": -74.0597040270357 }
+          ];
+        }
+      }
+
+      configurarInterfaz() {
+        const select = document.getElementById('destino');
+        if (!select) return;
+
+        populateDestSelectInIndex(this.lugares, select);
+
+        // Configurar botones
+        document.getElementById('btnMap').addEventListener('click', () => this.irAMapa());
+        document.getElementById('btnAR').addEventListener('click', () => this.irAAR());
+      }
+
+      obtenerDestinoSeleccionado() {
+        const select = document.getElementById('destino');
+        const destinoId = select.value;
+        
+        if (!destinoId) {
+          this.mostrarError('Por favor selecciona un destino');
+          return null;
+        }
+
+        const destino = this.lugares.find(l => l.id == destinoId);
+        if (!destino) {
+          this.mostrarError('Destino no encontrado');
+          return null;
+        }
+
+        return destino;
+      }
+
+      irAMapa() {
+        const destino = this.obtenerDestinoSeleccionado();
+        if (!destino) return;
+
+        window.location.href = `map.html?destino=${destino.id}`;
+      }
+
+      irAAR() {
+        const destino = this.obtenerDestinoSeleccionado();
+        if (!destino) return;
+
+        localStorage.setItem('ar-destino', JSON.stringify(destino));
+        window.location.href = `ar.html?dest=${destino.id}`;
+      }
+
+      mostrarError(mensaje) {
+        const errorExistente = document.querySelector('.error');
+        if (errorExistente) errorExistente.remove();
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error';
+        errorDiv.textContent = mensaje;
+        
+        const main = document.querySelector('main');
+        main.insertBefore(errorDiv, main.firstChild);
+
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+    }
+
+    // Inicializar aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      new App();
+    });
+  </script>
+</body>
+</html>
