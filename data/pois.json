@@ -1,8 +1,44 @@
 [
-  { "id": 0, "name": "Bloque A", "lat": 4.7259208149414125, "lon": -74.2823984664662 },
-  { "id": 1, "name": "Bloque B", "lat": 4.725973102429907, "lon": -74.28187516715501 },
-  { "id": 4, "name": "Bloque F", "lat": 4.725479567210997, "lon": -74.28173846616107 },
-  { "id": 6, "name": "PRIME",    "lat": 4.72491405767398, "lon": -74.28180294776199 },
-  { "id": 8, "name": "Colores",  "lat": 4.725140261544154, "lon": -74.28231622130524 },
-  { "id": 9, "name": "Cafetería principal", "lat": 4.725335619372632, "lon": -74.28238070290615 }
+  {
+    "id": 0,
+    "name": "Bloque A",
+    "lat": 4.6609819622582,
+    "lon": -74.0596161549797,
+    "description": "Edificio principal de aulas con laboratorios de computación y salas de estudio. Cuenta con 4 pisos y acceso a WiFi en todas las áreas."
+  },
+  {
+    "id": 1,
+    "name": "Bloque B",
+    "lat": 4.6612256555812,
+    "lon": -74.0595379523924,
+    "description": "Centro de recursos académicos con biblioteca, salas de lectura y espacios de trabajo colaborativo. Horario extendido hasta las 9pm."
+  },
+  {
+    "id": 4,
+    "name": "Bloque F",
+    "lat": 4.6611701025415,
+    "lon": -74.0597040270357,
+    "description": "Edificio de ciencias con laboratorios especializados de química, física y biología. Incluye auditorio para conferencias."
+  },
+  {
+    "id": 6,
+    "name": "PRIME",
+    "lat": 4.6615260954136,
+    "lon": -74.0595618398411,
+    "description": "Centro de innovación y emprendimiento. Espacio de coworking, salas de reuniones y área de prototipado para proyectos estudiantiles."
+  },
+  {
+    "id": 8,
+    "name": "Colores",
+    "lat": 4.6612381266711,
+    "lon": -74.0593889402125,
+    "description": "Zona de recreación y descanso al aire libre. Áreas verdes, bancas y punto de encuentro estudiantil con máquinas expendedoras."
+  },
+  {
+    "id": 9,
+    "name": "Cafetería principal",
+    "lat": 4.6611156832330,
+    "lon": -74.0595288524120,
+    "description": "Servicio de alimentación con variedad de menús, snacks y bebidas. Horario de 7am a 7pm. Acepta pagos con tarjeta y efectivo."
+  }
 ]

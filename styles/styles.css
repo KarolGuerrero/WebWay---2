@@ -207,3 +207,32 @@ footer {
   margin: 1rem 0;
   text-align: center;
 }
+
+/* Descripción del lugar */
+.lugar-descripcion {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid #667eea;
+  padding: 1rem 1.2rem;
+  border-radius: 0 10px 10px 0;
+  margin: 0 0 1.5rem 0;
+  text-align: left;
+  animation: fadeIn 0.3s ease;
+}
+
+.lugar-descripcion p {
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

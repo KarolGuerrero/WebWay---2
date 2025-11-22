@@ -9,7 +9,7 @@
 <body>
   <header>
     <h1>WebWay - Navegación Campus</h1>
-    <p>Selecciona tu destino y elige el modo</p>
+    <p>Selecciona tu destino para comenzar</p>
   </header>
 
   <main>
@@ -18,9 +18,12 @@
       <select id="destino">
         <option value="">-- Selecciona un lugar --</option>
       </select>
-      
+
+      <div id="lugar-descripcion" class="lugar-descripcion" style="display: none;">
+        <p id="descripcion-texto"></p>
+      </div>
+
       <div class="button-group">
-        <button id="btnMap" class="btn btn-secondary">Ver Mapa</button>
         <button id="btnAR" class="btn btn-primary">Modo AR con Orientación</button>
       </div>
     </section>
@@ -55,9 +58,9 @@
           console.error('Error cargando lugares:', error);
           // Datos de respaldo
           this.lugares = [
-            { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797 },
-            { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924 },
-            { "id": 4, "name": "Bloque F", "lat": 4.6611701025415, "lon": -74.0597040270357 }
+            { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797, "description": "Edificio principal de aulas" },
+            { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924, "description": "Centro de recursos académicos" },
+            { "id": 4, "name": "Bloque F", "lat": 4.6611701025415, "lon": -74.0597040270357, "description": "Edificio de ciencias" }
           ];
         }
       }
@@ -68,15 +71,37 @@
 
         populateDestSelectInIndex(this.lugares, select);
 
-        // Configurar botones
-        document.getElementById('btnMap').addEventListener('click', () => this.irAMapa());
+        // Mostrar descripción al cambiar selección
+        select.addEventListener('change', () => this.mostrarDescripcion());
+
+        // Configurar botón AR
         document.getElementById('btnAR').addEventListener('click', () => this.irAAR());
+      }
+
+      mostrarDescripcion() {
+        const select = document.getElementById('destino');
+        const destinoId = select.value;
+        const contenedor = document.getElementById('lugar-descripcion');
+        const textoEl = document.getElementById('descripcion-texto');
+
+        if (!destinoId) {
+          contenedor.style.display = 'none';
+          return;
+        }
+
+        const destino = this.lugares.find(l => l.id == destinoId);
+        if (destino && destino.description) {
+          textoEl.textContent = destino.description;
+          contenedor.style.display = 'block';
+        } else {
+          contenedor.style.display = 'none';
+        }
       }
 
       obtenerDestinoSeleccionado() {
         const select = document.getElementById('destino');
         const destinoId = select.value;
-        
+
         if (!destinoId) {
           this.mostrarError('Por favor selecciona un destino');
           return null;
@@ -89,13 +114,6 @@
         }
 
         return destino;
-      }
-
-      irAMapa() {
-        const destino = this.obtenerDestinoSeleccionado();
-        if (!destino) return;
-
-        window.location.href = `map.html?destino=${destino.id}`;
       }
 
       irAAR() {
@@ -113,7 +131,7 @@
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error';
         errorDiv.textContent = mensaje;
-        
+
         const main = document.querySelector('main');
         main.insertBefore(errorDiv, main.firstChild);
 
