@@ -4,14 +4,14 @@
     "name": "Bloque A",
     "lat": 4.6609819622582,
     "lon": -74.0596161549797,
-    "description": "Edificio principal de aulas con laboratorios de computación y salas de estudio. Cuenta con 4 pisos y acceso a WiFi en todas las áreas."
+    "description": "Cuenta con la capilla en el primer piso. Entre los pisos 2 y 6 se ubican los salones de clase y los baños, destinados a actividades académicas. En el séptimo piso se encuentran la Escuela de Postgrados y el área de Educación Virtual"
   },
   {
     "id": 1,
     "name": "Bloque B",
     "lat": 4.6612256555812,
     "lon": -74.0595379523924,
-    "description": "Centro de recursos académicos con biblioteca, salas de lectura y espacios de trabajo colaborativo. Horario extendido hasta las 9pm."
+    "description": "Se encuentran aulas con computadores, los laboratorios de física y la Escuela de Ciencias Exactas e Ingeniería y con un salón de profesores y baños disponibles desde el tercer piso."
   },
   {
     "id": 4,

@@ -7,6 +7,34 @@
   <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
+  <!-- Pantalla de selección de tipo de usuario -->
+  <div id="userSelectionScreen" class="user-selection-screen">
+    <div class="selection-container">
+      <div class="selection-logo">
+        <h1>WebWay AR</h1>
+        <p>Universidad Sergio Arboleda</p>
+      </div>
+
+      <div class="selection-title">
+        <h2>¿Quién eres?</h2>
+        <p>Selecciona tu tipo para comenzar</p>
+      </div>
+
+      <div class="user-type-buttons" id="userTypeButtons">
+        <!-- Los botones se cargarán dinámicamente -->
+      </div>
+
+      <div id="loadingSpinner" class="loading-spinner">
+        <p>⏳ Cargando...</p>
+      </div>
+
+      <div id="errorMessage" class="error-message">
+        ❌ No se pudo conectar al servidor. Verifica tu conexión.
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal (tu diseño original) -->
   <header>
     <h1>WebWay - Navegación Campus</h1>
     <p>Selecciona tu destino para comenzar</p>
@@ -33,8 +61,119 @@
     <p>Demo de orientación con Giroscopio y GPS</p>
   </footer>
 
+  <!-- Scripts -->
+  <script src="scripts/api.js"></script>
   <script type="module">
     import { loadPois, populateDestSelectInIndex } from './scripts/app.js';
+
+    // ═══════════════════════════════════════════════════════════
+    // GESTIÓN DE SELECCIÓN DE USUARIO
+    // ═══════════════════════════════════════════════════════════
+
+    const userTypeIcons = {
+      'visitante': '🎒',
+      'estudiante': '📚',
+      'trabajador': '💼'
+    };
+
+    const selectionScreen = document.getElementById('userSelectionScreen');
+    const userTypeButtons = document.getElementById('userTypeButtons');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Inicializar selección de usuario
+    async function initUserSelection() {
+      // Si ya hay sesión activa, saltar selección
+      if (arAPI.restoreSession()) {
+        showMainContent();
+        return;
+      }
+
+      // Cargar tipos de usuario
+      loadingSpinner.classList.add('active');
+      const userTypes = await arAPI.getUserTypes();
+      loadingSpinner.classList.remove('active');
+
+      if (userTypes.length === 0) {
+        errorMessage.classList.add('active');
+        return;
+      }
+
+      // Crear botones
+      userTypes.forEach(userType => {
+        const button = createUserTypeButton(userType);
+        userTypeButtons.appendChild(button);
+      });
+    }
+
+    // Crear botón de tipo de usuario
+    function createUserTypeButton(userType) {
+      const button = document.createElement('div');
+      button.className = 'user-type-btn';
+      button.onclick = () => selectUserType(userType.id, button);
+
+      const icon = userTypeIcons[userType.type_name] || '👤';
+
+      button.innerHTML = `
+        <div class="user-type-icon">${icon}</div>
+        <div class="user-type-content">
+          <h3>${capitalizeFirst(userType.type_name)}</h3>
+          <p>${userType.description}</p>
+        </div>
+      `;
+
+      return button;
+    }
+
+    // Seleccionar tipo de usuario
+    async function selectUserType(userTypeId, buttonElement) {
+      // Deshabilitar todos los botones
+      document.querySelectorAll('.user-type-btn').forEach(btn => {
+        btn.classList.add('loading');
+      });
+
+      loadingSpinner.classList.add('active');
+      errorMessage.classList.remove('active');
+
+      // Iniciar sesión
+      const success = await arAPI.startSession(userTypeId);
+
+      if (success) {
+        // Animación de éxito
+        buttonElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        buttonElement.style.color = 'white';
+        buttonElement.querySelector('.user-type-content h3').style.color = 'white';
+        buttonElement.querySelector('.user-type-content p').style.color = 'white';
+
+        // Esperar un momento y mostrar contenido principal
+        setTimeout(() => {
+          showMainContent();
+          initApp();
+        }, 500);
+      } else {
+        // Error
+        loadingSpinner.classList.remove('active');
+        errorMessage.classList.add('active');
+        document.querySelectorAll('.user-type-btn').forEach(btn => {
+          btn.classList.remove('loading');
+        });
+      }
+    }
+
+    // Mostrar contenido principal
+    function showMainContent() {
+      selectionScreen.classList.add('hidden');
+      document.body.classList.add('session-active');
+    }
+
+    // Utilidad
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // TU CÓDIGO ORIGINAL DE LA APP
+    // ═══════════════════════════════════════════════════════════
 
     class App {
       constructor() {
@@ -139,9 +278,14 @@
       }
     }
 
-    // Inicializar aplicación cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar la app solo después de selección de usuario
+    function initApp() {
       new App();
+    }
+
+    // Iniciar selección de usuario cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      initUserSelection();
     });
   </script>
 </body>

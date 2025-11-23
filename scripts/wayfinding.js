@@ -2,7 +2,6 @@
 import { populateUiAndReturnPois } from './app.js';
 import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './orientation.js';
 
-
 // --- GEODESY helpers
 const toRad = d => d * Math.PI/180;
 const toDeg = r => r * 180/Math.PI;
@@ -43,6 +42,61 @@ let watchId = null;
 const ORIGIN_ACCEPT_RADIUS_M = 12;
 const GUIDE_AHEAD_METERS = 6;
 const ARRIVAL_DISTANCE_METERS = 4;
+
+// ══════════════════════════════════════════════════════════════
+// TRACKING DE NAVEGACIÓN (NUEVO)
+// ══════════════════════════════════════════════════════════════
+let navigationStartTime = null;
+let navigationStartPosition = null;
+let totalDistanceTraveled = 0;
+let lastPosition = null;
+
+function startNavigationTracking(userLat, userLon) {
+  navigationStartTime = Date.now();
+  navigationStartPosition = { lat: userLat, lon: userLon };
+  lastPosition = { lat: userLat, lon: userLon };
+  totalDistanceTraveled = 0;
+  console.log('📍 Tracking iniciado:', { poi: currentDestination.name, start: navigationStartPosition });
+}
+
+function updateNavigationDistance(userLat, userLon) {
+  if (lastPosition) {
+    const segmentDist = distanceMeters(lastPosition.lat, lastPosition.lon, userLat, userLon);
+    totalDistanceTraveled += segmentDist;
+  }
+  lastPosition = { lat: userLat, lon: userLon };
+}
+
+async function completeNavigationTracking(arrived = true) {
+  if (!navigationStartTime || !navigationStartPosition) return;
+
+  const durationSeconds = Math.floor((Date.now() - navigationStartTime) / 1000);
+
+  // Registrar en el backend
+  if (window.arAPI && window.arAPI.hasActiveSession()) {
+    await window.arAPI.registerNavigation(currentDestination.id, {
+      originLat: navigationStartPosition.lat,
+      originLon: navigationStartPosition.lon,
+      duration: durationSeconds,
+      distance: Math.round(totalDistanceTraveled),
+      completed: arrived
+    });
+
+    console.log('✅ Navegación registrada:', {
+      poi: currentDestination.name,
+      duration: durationSeconds + 's',
+      distance: Math.round(totalDistanceTraveled) + 'm',
+      completed: arrived
+    });
+  }
+
+  // Resetear
+  navigationStartTime = null;
+  navigationStartPosition = null;
+  totalDistanceTraveled = 0;
+  lastPosition = null;
+}
+// ══════════════════════════════════════════════════════════════
 
 // DOM refs
 const infoDiv = () => document.getElementById('info');
@@ -173,8 +227,22 @@ function startGuidance() {
   infoDiv().textContent = `Destino: ${currentDestination.name}`;
 
   if (watchId) navigator.geolocation.clearWatch(watchId);
+  
+  // NUEVO: Iniciar tracking en la primera posición
+  let isFirstPosition = true;
+  
   watchId = navigator.geolocation.watchPosition(pos => {
     const userLat = pos.coords.latitude, userLon = pos.coords.longitude;
+    
+    // NUEVO: Iniciar tracking en la primera posición
+    if (isFirstPosition) {
+      startNavigationTracking(userLat, userLon);
+      isFirstPosition = false;
+    } else {
+      // NUEVO: Actualizar distancia recorrida
+      updateNavigationDistance(userLat, userLon);
+    }
+    
     updateGuidance(userLat, userLon);
   }, err => {
     console.error('geo error', err);
@@ -187,7 +255,16 @@ function startGuidance() {
 }
 
 function stopGuidance(){
-  if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  if (watchId) { 
+    navigator.geolocation.clearWatch(watchId); 
+    watchId = null; 
+  }
+  
+  // NUEVO: Registrar navegación como incompleta si se detiene manualmente
+  if (navigationStartTime) {
+    completeNavigationTracking(false);
+  }
+  
   infoDiv().textContent = 'Guía detenida.';
   startBtn().style.display = 'inline-block';
   stopBtn().style.display = 'none';
@@ -203,6 +280,10 @@ function updateGuidance(userLat, userLon) {
 
   if (dist <= ARRIVAL_DISTANCE_METERS) {
     infoDiv().innerHTML += '<br><b>Has llegado 🎉</b>';
+    
+    // NUEVO: Registrar navegación como completada
+    completeNavigationTracking(true);
+    
     stopGuidance();
     return;
   }

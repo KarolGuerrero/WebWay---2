@@ -184,9 +184,20 @@
     <p>Inicializando sensores...</p>
   </div>
 
+  <!-- NUEVO: Script de API -->
+  <script src="scripts/api.js"></script>
+
   <script type="module">
     import { populateUiAndReturnPoisForAR } from './scripts/app.js';
     import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './scripts/orientation.js';
+
+    // ══════════════════════════════════════════════════════════════
+    // VERIFICAR SESIÓN ACTIVA (NUEVO)
+    // ══════════════════════════════════════════════════════════════
+    if (!window.arAPI || !window.arAPI.restoreSession()) {
+      alert('No hay sesión activa. Redirigiendo...');
+      window.location.href = 'index.html';
+    }
 
     class KalmanFilter {
       constructor(processNoise = 0.001, measurementNoise = 0.5) {
@@ -203,13 +214,8 @@
           return measurement;
         }
 
-        // Actualizar con error de medición si está disponible
         const r = measurementError !== null ? measurementError : this.r;
-
-        // Predicción
         this.p = this.p + this.q;
-
-        // Actualización
         this.k = this.p / (this.p + r);
         this.x = this.x + this.k * (measurement - this.x);
         this.p = (1 - this.k) * this.p;
@@ -227,13 +233,11 @@
       }
 
       addPosition(lat, lon, accuracy) {
-        // Normalizar el error de medición
         const normalizedError = Math.min(accuracy / 10, 10);
         
         const filteredLat = this.latFilter.filter(lat, normalizedError);
         const filteredLon = this.lonFilter.filter(lon, normalizedError);
 
-        // Mantener historial
         this.positions.push({ lat: filteredLat, lon: filteredLon, accuracy, timestamp: Date.now() });
         if (this.positions.length > this.maxPositions) {
           this.positions.shift();
@@ -245,7 +249,6 @@
       getSmoothedPosition() {
         if (this.positions.length === 0) return null;
 
-        // Promedio ponderado por precisión (menor accuracy = mayor peso)
         let totalWeight = 0;
         let weightedLat = 0;
         let weightedLon = 0;
@@ -275,20 +278,26 @@
         this.userPosition = null;
         this.watchId = null;
         
-        // Filtro de posición GPS
         this.gpsFilter = new GPSPositionFilter();
         
-        // Orientación
         this.currentHeading = 0;
         this.targetBearing = 0;
         this.currentDistance = 0;
         
-        // Elementos DOM
         this.infoDiv = null;
         this.debugDiv = null;
         this.statusText = null;
         this.compassDirection = null;
         this.gpsQualityText = null;
+        
+        // ══════════════════════════════════════════════════════════════
+        // TRACKING DE NAVEGACIÓN (NUEVO)
+        // ══════════════════════════════════════════════════════════════
+        this.navigationStartTime = null;
+        this.navigationStartPosition = null;
+        this.totalDistanceTraveled = 0;
+        this.lastPosition = null;
+        this.navigationActive = false;
         
         this.init();
       }
@@ -297,19 +306,15 @@
         try {
           console.log('🧭 Iniciando Navegación por Orientación...');
           
-          // Cargar destino
           await this.cargarDestino();
           this.configurarElementosDOM();
           
-          // Inicializar Three.js
           this.inicializarThreeJS();
           
-          // Iniciar sistemas
           await this.iniciarCamara();
           this.iniciarGPS();
           await this.iniciarOrientacion();
           
-          // Iniciar render loop
           this.animate();
           
           document.getElementById('loading').style.display = 'none';
@@ -318,6 +323,71 @@
           console.error('❌ Error:', error);
           this.mostrarError('Error: ' + error.message);
         }
+      }
+
+      // ══════════════════════════════════════════════════════════════
+      // MÉTODOS DE TRACKING (NUEVO)
+      // ══════════════════════════════════════════════════════════════
+      
+      startNavigationTracking(userLat, userLon) {
+        this.navigationStartTime = Date.now();
+        this.navigationStartPosition = { lat: userLat, lon: userLon };
+        this.lastPosition = { lat: userLat, lon: userLon };
+        this.totalDistanceTraveled = 0;
+        this.navigationActive = true;
+        console.log('📍 Tracking iniciado:', { 
+          poi: this.destino.name, 
+          start: this.navigationStartPosition 
+        });
+      }
+
+      updateNavigationDistance(userLat, userLon) {
+        if (this.lastPosition && this.navigationActive) {
+          const segmentDist = this.calcularDistancia(
+            this.lastPosition.lat, 
+            this.lastPosition.lon, 
+            userLat, 
+            userLon
+          );
+          // Solo contar si el movimiento es razonable (menos de 50m entre updates)
+          if (segmentDist < 50) {
+            this.totalDistanceTraveled += segmentDist;
+          }
+        }
+        this.lastPosition = { lat: userLat, lon: userLon };
+      }
+
+      async completeNavigationTracking(arrived = true) {
+        if (!this.navigationStartTime || !this.navigationStartPosition || !this.navigationActive) {
+          return;
+        }
+
+        this.navigationActive = false;
+        const durationSeconds = Math.floor((Date.now() - this.navigationStartTime) / 1000);
+
+        // Registrar en el backend
+        if (window.arAPI && window.arAPI.hasActiveSession()) {
+          await window.arAPI.registerNavigation(this.destino.id, {
+            originLat: this.navigationStartPosition.lat,
+            originLon: this.navigationStartPosition.lon,
+            duration: durationSeconds,
+            distance: Math.round(this.totalDistanceTraveled),
+            completed: arrived
+          });
+
+          console.log('✅ Navegación registrada:', {
+            poi: this.destino.name,
+            duration: durationSeconds + 's',
+            distance: Math.round(this.totalDistanceTraveled) + 'm',
+            completed: arrived
+          });
+        }
+
+        // Resetear
+        this.navigationStartTime = null;
+        this.navigationStartPosition = null;
+        this.totalDistanceTraveled = 0;
+        this.lastPosition = null;
       }
 
       async cargarDestino() {
@@ -349,22 +419,18 @@
         this.compassDirection = document.getElementById('compass-direction');
         this.gpsQualityText = document.getElementById('gps-quality-text');
         
-        // Botón de calibración
         document.getElementById('calibrate-btn').addEventListener('click', () => {
           this.calibrarBrujula();
         });
       }
 
       inicializarThreeJS() {
-        // Configurar escena
         this.scene = new THREE.Scene();
         this.scene.background = null;
 
-        // Configurar cámara
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         this.camera.position.set(0, 0, 5);
 
-        // Configurar renderer
         this.renderer = new THREE.WebGLRenderer({ 
           alpha: true, 
           antialias: true,
@@ -379,20 +445,15 @@
         
         document.getElementById('threejs-container').appendChild(this.renderer.domElement);
 
-        // Crear flecha 3D
         this.crearFlecha3D();
-        
-        // Configurar luces
         this.configurarLuces();
         
-        // Manejar redimensionado
         window.addEventListener('resize', this.onWindowResize.bind(this));
       }
 
       crearFlecha3D() {
         const arrowGroup = new THREE.Group();
 
-        // Cuerpo de la flecha (cono)
         const coneGeometry = new THREE.ConeGeometry(0.2, 0.8, 8);
         const coneMaterial = new THREE.MeshPhongMaterial({ 
           color: 0x4CAF50,
@@ -402,7 +463,6 @@
         const cone = new THREE.Mesh(coneGeometry, coneMaterial);
         cone.position.y = 0.4;
 
-        // Base de la flecha (cilindro)
         const cylinderGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.4, 8);
         const cylinderMaterial = new THREE.MeshPhongMaterial({ 
           color: 0x3366FF 
@@ -410,11 +470,9 @@
         const cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
         cylinder.position.y = -0.2;
 
-        // Añadir al grupo
         arrowGroup.add(cone);
         arrowGroup.add(cylinder);
 
-        // Posicionar la flecha
         arrowGroup.position.set(0, 0, -2);
         arrowGroup.scale.set(2, 2, 2);
 
@@ -470,13 +528,27 @@
 
         console.log('🌍 Iniciando GPS con alta precisión...');
         
+        // MODIFICADO: Variable para tracking de primera posición
+        let isFirstPosition = true;
+        
         this.watchId = navigator.geolocation.watchPosition(
-          (position) => this.actualizarPosicionUsuario(position),
+          (position) => {
+            // NUEVO: Iniciar tracking en primera posición
+            if (isFirstPosition) {
+              const smoothed = this.gpsFilter.getSmoothedPosition();
+              if (smoothed) {
+                this.startNavigationTracking(smoothed.lat, smoothed.lon);
+                isFirstPosition = false;
+              }
+            }
+            
+            this.actualizarPosicionUsuario(position);
+          },
           (error) => this.manejarErrorGPS(error),
           {
             enableHighAccuracy: true,
             timeout: 30000,
-            maximumAge: 0  // Siempre obtener posición fresca
+            maximumAge: 0
           }
         );
       }
@@ -491,7 +563,6 @@
         installDeviceOrientationListener();
         console.log('🧭 Sensores de orientación iniciados');
         
-        // Actualizar orientación periódicamente
         setInterval(() => {
           this.actualizarOrientacion();
         }, 100);
@@ -520,15 +591,15 @@
         const rawLon = position.coords.longitude;
         const accuracy = position.coords.accuracy;
         
-        // Aplicar filtro Kalman a la posición
         const filtered = this.gpsFilter.addPosition(rawLat, rawLon, accuracy);
         const smoothed = this.gpsFilter.getSmoothedPosition();
         
-        // Usar posición suavizada si está disponible, sino usar filtrada
         const userLat = smoothed ? smoothed.lat : filtered.lat;
         const userLon = smoothed ? smoothed.lon : filtered.lon;
         
-        // Actualizar indicador de calidad GPS
+        // NUEVO: Actualizar distancia recorrida
+        this.updateNavigationDistance(userLat, userLon);
+        
         this.actualizarCalidadGPS(accuracy);
         
         if (this.destino) {
@@ -611,14 +682,14 @@
           <small>Precisión GPS: ±${Math.round(accuracy)}m</small>
         `);
         
-        // Debug info
         if (this.debugDiv) {
           const smoothed = this.gpsFilter.getSmoothedPosition();
           this.debugDiv.innerHTML = `
             Posición: ${smoothed ? smoothed.lat.toFixed(7) : 'N/A'}, ${smoothed ? smoothed.lon.toFixed(7) : 'N/A'}<br>
             Destino: ${this.destino.lat.toFixed(7)}, ${this.destino.lon.toFixed(7)}<br>
             Distancia: ${Math.round(distancia)}m | Rumbo: ${Math.round(rumbo)}°<br>
-            Heading: ${Math.round(this.currentHeading)}° | Muestras GPS: ${this.gpsFilter.positions.length}
+            Heading: ${Math.round(this.currentHeading)}° | Muestras GPS: ${this.gpsFilter.positions.length}<br>
+            Recorrido: ${Math.round(this.totalDistanceTraveled)}m
           `;
         }
       }
@@ -628,18 +699,14 @@
           return;
         }
 
-        // Calcular rotación relativa
         let relativeBearing = this.targetBearing - this.currentHeading;
         
-        // Ajustar para rango [-180, 180]
         if (relativeBearing > 180) relativeBearing -= 360;
         if (relativeBearing < -180) relativeBearing += 360;
         
-        // Convertir a radianes y rotar flecha
         const rotationY = THREE.MathUtils.degToRad(relativeBearing);
         this.arrow.rotation.y = rotationY;
         
-        // Cambiar color basado en alineación
         this.actualizarColorFlecha(Math.abs(relativeBearing));
       }
 
@@ -651,11 +718,11 @@
         
         let color;
         if (angleDiff < 15) {
-          color = 0x4CAF50; // Verde
+          color = 0x4CAF50;
         } else if (angleDiff < 45) {
-          color = 0xFF9800; // Naranja
+          color = 0xFF9800;
         } else {
-          color = 0xF44336; // Rojo
+          color = 0xF44336;
         }
         
         cone.material.color.setHex(color);
@@ -685,13 +752,17 @@
         }
       }
 
-      llegadaDestino() {
+      // MODIFICADO: Registrar navegación completada
+      async llegadaDestino() {
         this.actualizarEstado(`
           <div style="color: #4CAF50; font-weight: bold;">
             🎉 ¡HAS LLEGADO!<br>
             ${this.destino.name}
           </div>
         `);
+        
+        // NUEVO: Registrar navegación completada
+        await this.completeNavigationTracking(true);
         
         if (this.watchId) {
           navigator.geolocation.clearWatch(this.watchId);
@@ -721,7 +792,7 @@
           case error.TIMEOUT:
             mensaje = 'Tiempo de espera agotado. Reintentando...';
             console.log('⏱️ GPS timeout, continuando...');
-            return; // No mostrar error en timeout, solo reintentar
+            return;
           default:
             mensaje = 'Error de GPS: ' + error.message;
         }
@@ -733,7 +804,13 @@
         this.actualizarEstado(`<div style="color: #ff4444;">${mensaje}</div>`);
       }
 
-      cleanup() {
+      // MODIFICADO: Registrar navegación incompleta si se cierra
+      async cleanup() {
+        // NUEVO: Registrar como incompleta si está activa
+        if (this.navigationActive) {
+          await this.completeNavigationTracking(false);
+        }
+        
         if (this.watchId) {
           navigator.geolocation.clearWatch(this.watchId);
         }
@@ -747,12 +824,10 @@
       }
     }
 
-    // Inicializar cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
       window.orientationAR = new OrientationAR();
     });
 
-    // Cleanup al salir
     window.addEventListener('beforeunload', () => {
       if (window.orientationAR) {
         window.orientationAR.cleanup();

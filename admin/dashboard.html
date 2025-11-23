@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Campus AR Analytics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        .login-box h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: none;
+        }
+
+        .navbar {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            color: #666;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            text-align: left;
+            padding: 12px;
+            background: #f8f9fa;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1>Admin Login</h1>
+            <p>Dashboard de Analíticas - Campus AR</p>
+            
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <nav class="navbar">
+            <h1>📊 Campus AR Analytics</h1>
+            <div class="navbar-right">
+                <span class="user-info">Bienvenido, <strong id="adminName"></strong></span>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <!-- Estadísticas Generales -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Sesiones</h3>
+                    <div class="value" id="totalSessions">-</div>
+                    <div class="label">Usuarios únicos</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Navegaciones</h3>
+                    <div class="value" id="totalNavigations">-</div>
+                    <div class="label">POIs visitados</div>
+                </div>
+                <div class="stat-card">
+                    <h3>POI Más Popular</h3>
+                    <div class="value" id="mostVisitedName">-</div>
+                    <div class="label" id="mostVisitedCount">- visitas</div>
+                </div>
+                <div class="stat-card">
+                    <h3>POI Menos Visitado</h3>
+                    <div class="value" id="leastVisitedName">-</div>
+                    <div class="label" id="leastVisitedCount">- visitas</div>
+                </div>
+            </div>
+
+            <!-- Distribución por Tipo de Usuario -->
+            <div class="card">
+                <h2>📊 Distribución por Tipo de Usuario</h2>
+                <table id="userTypeTable">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Usuario</th>
+                            <th>Sesiones</th>
+                            <th>Porcentaje</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Ranking de POIs -->
+            <div class="card">
+                <h2>🏆 Ranking de POIs por Visitas</h2>
+                <table id="poiRankingTable">
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>POI</th>
+                            <th>Categoría</th>
+                            <th>Total Visitas</th>
+                            <th>Visitantes Únicos</th>
+                            <th>Tiempo Promedio</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Navegaciones Recientes -->
+            <div class="card">
+                <h2>🕐 Navegaciones Recientes</h2>
+                <table id="recentNavigationsTable">
+                    <thead>
+                        <tr>
+                            <th>POI</th>
+                            <th>Tipo Usuario</th>
+                            <th>Fecha y Hora</th>
+                            <th>Duración</th>
+                            <th>Distancia</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let authToken = null;
+        let refreshInterval = null;
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            try {
+                const response = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('adminName', data.admin.full_name || data.admin.username);
+                    
+                    showDashboard();
+                } else {
+                    errorDiv.textContent = data.message || 'Credenciales inválidas';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Error de conexión';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Mostrar Dashboard
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('adminName').textContent = localStorage.getItem('adminName');
+            
+            loadDashboardData();
+            
+            // Actualizar cada 30 segundos
+            refreshInterval = setInterval(loadDashboardData, 30000);
+        }
+
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            await Promise.all([
+                loadGeneralStats(),
+                loadPOIRanking(),
+                loadRecentNavigations()
+            ]);
+        }
+
+        // Estadísticas generales
+        async function loadGeneralStats() {
+            try {
+                const response = await fetch(`${API_URL}/admin/stats/general`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+                    
+                    document.getElementById('totalSessions').textContent = stats.total_sessions;
+                    document.getElementById('totalNavigations').textContent = stats.total_navigations;
+                    
+                    document.getElementById('mostVisitedName').textContent = stats.most_visited_poi?.name || '-';
+                    document.getElementById('mostVisitedCount').textContent = `${stats.most_visited_poi?.visits || 0} visitas`;
+                    
+                    document.getElementById('leastVisitedName').textContent = stats.least_visited_poi?.name || '-';
+                    document.getElementById('leastVisitedCount').textContent = `${stats.least_visited_poi?.visits || 0} visitas`;
+
+                    // Tabla de tipos de usuario
+                    const tbody = document.querySelector('#userTypeTable tbody');
+                    tbody.innerHTML = '';
+                    stats.sessions_by_type.forEach(item => {
+                        const percentage = ((item.count / stats.total_sessions) * 100).toFixed(1);
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${item.type_name}</td>
+                                <td>${item.count}</td>
+                                <td><strong>${percentage}%</strong></td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        // Ranking de POIs
+        async function loadPOIRanking() {
+            try {
+                const response = await fetch(`${API_URL}/admin/stats/poi-ranking`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const tbody = document.querySelector('#poiRankingTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach((poi, index) => {
+                        const minutes = Math.floor(poi.avg_duration_seconds / 60);
+                        const seconds = poi.avg_duration_seconds % 60;
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>#${index + 1}</strong></td>
+                                <td>${poi.name}</td>
+                                <td><span class="badge badge-info">${poi.category || 'N/A'}</span></td>
+                                <td>${poi.total_visits}</td>
+                                <td>${poi.unique_visitors}</td>
+                                <td>${minutes}m ${seconds}s</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando ranking:', error);
+            }
+        }
+
+        // Navegaciones recientes
+        async function loadRecentNavigations() {
+            try {
+                const response = await fetch(`${API_URL}/admin/stats/recent-navigations?limit=10`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const tbody = document.querySelector('#recentNavigationsTable tbody');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach(nav => {
+                        const date = new Date(nav.navigation_timestamp);
+                        const formattedDate = date.toLocaleString('es-CO');
+                        const duration = nav.duration_seconds ? `${Math.floor(nav.duration_seconds / 60)}m ${nav.duration_seconds % 60}s` : 'N/A';
+                        const distance = nav.distance_meters ? `${nav.distance_meters.toFixed(0)}m` : 'N/A';
+                        const status = nav.completed ? 
+                            '<span class="badge badge-success">Completado</span>' : 
+                            '<span class="badge badge-warning">Incompleto</span>';
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${nav.poi_name}</td>
+                                <td>${nav.user_type}</td>
+                                <td>${formattedDate}</td>
+                                <td>${duration}</td>
+                                <td>${distance}</td>
+                                <td>${status}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando navegaciones:', error);
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('adminName');
+            authToken = null;
+            
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+            
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Verificar si ya hay token guardado
+        window.addEventListener('load', () => {
+            const savedToken = localStorage.getItem('authToken');
+            if (savedToken) {
+                authToken = savedToken;
+                showDashboard();
+            }
+        });
+    </script>
+</body>
+</html>

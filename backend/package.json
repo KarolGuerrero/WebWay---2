@@ -1,0 +1,20 @@
+{
+  "name": "webway-backend",
+  "version": "1.0.0",
+  "main": "apiServer.js",
+  "scripts": {
+    "init": "node initializeDatabase.js",
+    "start": "node apiServer.js",
+    "dev": "nodemon apiServer.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.3",
+    "express": "^4.18.2",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
