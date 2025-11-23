@@ -1,7 +1,7 @@
 // api.js - Cliente para comunicarse con el backend
 // Coloca este archivo en la carpeta scripts/
 
-const API_BASE_URL = 'http://localhost:3000/api'; // Cambiar en producción
+const API_BASE_URL = 'https://webway-2-production.up.railway.app/api'; // Cambiar en producción
 
 class ARAnalyticsAPI {
   constructor() {
