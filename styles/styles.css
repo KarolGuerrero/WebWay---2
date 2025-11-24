@@ -363,9 +363,10 @@ body {
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(245, 247, 250, 0.95) 0%, 
-    rgba(245, 247, 250, 0.92) 50%,
-    rgba(255, 193, 7, 0.1) 100%);
+    rgba(0, 59, 122, 0.92) 0%, 
+    rgba(0, 59, 122, 0.85) 40%,
+    rgba(0, 59, 122, 0.75) 70%,
+    rgba(255, 193, 7, 0.4) 100%);
   z-index: 0;
   pointer-events: none;
 }
