@@ -60,15 +60,63 @@ function startNavigationTracking(userLat, userLon) {
   console.log('📍 Tracking iniciado:', { poi: currentDestination.name, start: navigationStartPosition });
 }
 
+let lastUpdateTime = null;
+let navigationActive = true;
+
 function updateNavigationDistance(userLat, userLon) {
-  if (lastTrackedPosition) {
-    const segmentDist = distanceMeters(lastTrackedPosition.lat, lastTrackedPosition.lon, userLat, userLon);
-    // Solo contar si el movimiento es razonable (menos de 50m entre updates)
-    if (segmentDist < 50) {
+  // Si la navegación ya no está activa, no seguir sumando
+  if (!navigationActive) return;
+  
+  const now = Date.now();
+  
+  if (lastTrackedPosition && lastUpdateTime) {
+    const segmentDist = distanceMeters(
+      lastTrackedPosition.lat, 
+      lastTrackedPosition.lon, 
+      userLat, 
+      userLon
+    );
+    
+    const timeElapsed = (now - lastUpdateTime) / 1000; // segundos
+    
+    // Evitar división por cero
+    if (timeElapsed < 0.5) return; // Ignorar updates muy frecuentes
+    
+    const speed = segmentDist / timeElapsed; // m/s
+    
+    // Criterios para contar el movimiento:
+    // 1. Movimiento significativo (>= 3m) - filtra ruido GPS
+    // 2. Movimiento razonable (< 50m en un update) - evita saltos GPS
+    // 3. Velocidad humana razonable (0.5 a 10 m/s = 1.8 a 36 km/h)
+    if (segmentDist >= 3 && segmentDist < 50 && speed >= 0.5 && speed <= 10) {
       totalDistanceTraveled += segmentDist;
+      lastTrackedPosition = { lat: userLat, lon: userLon };
+      lastUpdateTime = now;
+      console.log(`📏 +${segmentDist.toFixed(1)}m | Total: ${totalDistanceTraveled.toFixed(1)}m | Velocidad: ${speed.toFixed(1)}m/s`);
+    } else if (segmentDist >= 50 || speed > 10) {
+      // Salto GPS detectado - actualizar posición sin sumar distancia
+      console.warn('⚠️ Salto GPS detectado:', segmentDist.toFixed(1), 'm en', timeElapsed.toFixed(1), 's');
+      lastTrackedPosition = { lat: userLat, lon: userLon };
+      lastUpdateTime = now;
     }
+  } else {
+    // Primera posición
+    lastTrackedPosition = { lat: userLat, lon: userLon };
+    lastUpdateTime = now;
   }
-  lastTrackedPosition = { lat: userLat, lon: userLon };
+}
+
+// Y al llegar:
+if (dist <= arrivalRadius) {
+  // Detener tracking inmediatamente
+  navigationActive = false;
+  
+  infoHTML += '<br><b style="color: #4CAF50;">✅ ¡Has llegado!</b>';
+  infoDiv().innerHTML = infoHTML;
+  
+  completeNavigationTracking(true);
+  stopGuidance();
+  return;
 }
 
 async function completeNavigationTracking(arrived = true) {
