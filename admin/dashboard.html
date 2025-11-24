@@ -16,95 +16,149 @@
             background: #f5f7fa;
         }
 
-        /* Login Screen - Colores Universidad Sergio Arboleda */
+        /* Login Screen - Con imagen de fondo */
         .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #003B7A 0%, #FFC107 100%);
+            background-image: url('https://www.usergioarboleda.edu.co/wp-content/uploads/2018/06/Lo-que-debes-saber-de-la-Sergio--scaled.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        /* Overlay oscuro para mejor legibilidad */
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 59, 122, 0.85) 0%, rgba(0, 59, 122, 0.65) 50%, rgba(255, 193, 7, 0.5) 100%);
+            z-index: 1;
         }
 
         .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            width: 400px;
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 45px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 100px rgba(255, 193, 7, 0.1);
+            width: 420px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
 
         .login-header img {
-            max-width: 200px;
+            max-width: 220px;
             height: auto;
             margin-bottom: 20px;
+            filter: drop-shadow(0 4px 8px rgba(0, 59, 122, 0.2));
         }
 
         .login-box h1 {
             color: #003B7A;
             margin-bottom: 10px;
-            font-size: 28px;
+            font-size: 32px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .login-box p {
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+            font-size: 15px;
+            font-weight: 500;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #003B7A;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
+            padding: 14px 16px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            background: white;
         }
 
         .form-group input:focus {
             outline: none;
             border-color: #FFC107;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
+            transform: translateY(-2px);
         }
 
         .btn-primary {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #FFC107 0%, #003B7A 100%);
-            color: white;
+            padding: 16px;
+            background: linear-gradient(135deg, #FFC107 0%, #FFD54F 50%, #FFC107 100%);
+            background-size: 200% 100%;
+            color: #003B7A;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+            background-position: 100% 0;
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
         }
 
         .error-message {
-            background: #fee;
+            background: linear-gradient(135deg, #fee 0%, #fdd 100%);
             color: #c33;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             margin-bottom: 20px;
             display: none;
+            border-left: 4px solid #c33;
+            font-weight: 500;
         }
 
         /* Dashboard */
@@ -113,54 +167,68 @@
         }
 
         .navbar {
-            background: #003B7A;
-            padding: 15px 40px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #003B7A 0%, #004A99 100%);
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .navbar-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         .navbar-logo {
-            height: 50px;
+            height: 55px;
             width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .navbar h1 {
             color: white;
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .navbar-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         .user-info {
             color: white;
+            font-size: 15px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .btn-logout {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: #FFC107;
             color: #003B7A;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
         }
 
         .btn-logout:hover {
             background: #FFD54F;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
         }
 
         .container {
@@ -171,52 +239,87 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
             margin-bottom: 40px;
         }
 
         .stat-card {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-left: 4px solid #FFC107;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #FFC107;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, transparent 70%);
+            border-radius: 0 0 0 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border-left-width: 8px;
         }
 
         .stat-card h3 {
             color: #003B7A;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 12px;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .stat-card .value {
-            font-size: 36px;
-            font-weight: bold;
-            color: #FFC107;
-            margin-bottom: 5px;
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1;
         }
 
         .stat-card .label {
             color: #666;
             font-size: 14px;
+            font-weight: 500;
         }
 
         .card {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            border-top: 3px solid #003B7A;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            border-top: 4px solid #003B7A;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         }
 
         .card h2 {
             color: #003B7A;
-            margin-bottom: 20px;
-            font-size: 20px;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         table {
@@ -226,48 +329,60 @@
 
         table th {
             text-align: left;
-            padding: 12px;
-            background: #003B7A;
+            padding: 16px;
+            background: linear-gradient(135deg, #003B7A 0%, #004A99 100%);
             color: white;
-            font-weight: 600;
-            border-bottom: 2px solid #FFC107;
+            font-weight: 700;
+            border-bottom: 3px solid #FFC107;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
 
         table td {
-            padding: 12px;
+            padding: 16px;
             border-bottom: 1px solid #f0f0f0;
             color: #333;
+            font-size: 14px;
+        }
+
+        table tr {
+            transition: all 0.2s ease;
         }
 
         table tr:hover {
-            background: #FFFBEA;
+            background: linear-gradient(90deg, #FFFBEA 0%, transparent 100%);
+            transform: scale(1.01);
         }
 
         .badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .badge-success {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
             color: #155724;
         }
 
         .badge-warning {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
             color: #856404;
         }
 
         .badge-info {
-            background: #FFF9E6;
-            color: #FFC107;
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFF3CD 100%);
+            color: #FF8F00;
+            font-weight: 700;
         }
 
         .badge-primary {
-            background: #E3F2FD;
+            background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
             color: #003B7A;
         }
 
@@ -279,15 +394,39 @@
 
         /* Accent colors */
         .accent-yellow {
-            color: #FFC107;
+            background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
         }
 
         .accent-blue {
             color: #003B7A;
+            font-weight: 700;
+        }
+
+        /* Animaciones sutiles */
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .stat-card .value {
+            animation: pulse 2s ease-in-out infinite;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
+            .login-box {
+                width: 90%;
+                padding: 30px;
+            }
+
             .navbar {
                 flex-direction: column;
                 gap: 15px;
@@ -300,11 +439,11 @@
             }
 
             .navbar h1 {
-                font-size: 16px;
+                font-size: 18px;
             }
 
             .navbar-logo {
-                height: 40px;
+                height: 45px;
             }
 
             .navbar-right {
@@ -325,11 +464,15 @@
             }
 
             table {
-                font-size: 14px;
+                font-size: 13px;
             }
 
             table th, table td {
-                padding: 8px;
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px;
             }
         }
     </style>
@@ -342,7 +485,7 @@
                 <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="login-logo">
             </div>
             <h1>Admin Login</h1>
-            <p>Dashboard de Analíticas - Webway</p>
+            <p>Dashboard de Analíticas - WebWay</p>
             
             <div id="errorMessage" class="error-message"></div>
 
@@ -365,7 +508,7 @@
         <nav class="navbar">
             <div class="navbar-left">
                 <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="navbar-logo">
-                <h1>WebWay</h1>
+                <h1>WebWay Analytics</h1>
             </div>
             <div class="navbar-right">
                 <span class="user-info">Bienvenido, <strong id="adminName"></strong></span>
