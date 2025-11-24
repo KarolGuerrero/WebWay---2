@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,6 +60,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -134,6 +136,32 @@
             border-color: #FFC107;
             box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
             transform: translateY(-2px);
+        }
+
+        .btn-back-home {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 15px;
+            background: white;
+            color: #003B7A;
+            border: 2px solid #003B7A;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-back-home:hover {
+            background: #003B7A;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 59, 122, 0.3);
         }
 
         .btn-primary {
@@ -421,9 +449,12 @@
 
         /* Animaciones sutiles */
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.8;
             }
@@ -480,7 +511,8 @@
                 font-size: 13px;
             }
 
-            table th, table td {
+            table th,
+            table td {
                 padding: 10px;
             }
 
@@ -490,16 +522,19 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
         <div class="login-box">
             <div class="login-header">
-                <img href="https://web-way-2.vercel.app/" src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="login-logo">
+                <img href="https://web-way-2.vercel.app/"
+                    src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
+                    alt="Universidad Sergio Arboleda" class="login-logo">
             </div>
             <h1>Admin Login</h1>
             <p>Dashboard de Analíticas - WebWay</p>
-            
+
             <div id="errorMessage" class="error-message"></div>
 
             <form id="loginForm">
@@ -522,7 +557,8 @@
     <div id="dashboard" class="dashboard">
         <nav class="navbar">
             <div class="navbar-left">
-                <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="navbar-logo">
+                <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
+                    alt="Universidad Sergio Arboleda" class="navbar-logo">
                 <h1>WebWay Analytics</h1>
             </div>
             <div class="navbar-right">
@@ -617,7 +653,7 @@
         // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('errorMessage');
@@ -635,7 +671,7 @@
                     authToken = data.token;
                     localStorage.setItem('authToken', authToken);
                     localStorage.setItem('adminName', data.admin.full_name || data.admin.username);
-                    
+
                     showDashboard();
                 } else {
                     errorDiv.textContent = data.message || 'Credenciales inválidas';
@@ -652,9 +688,9 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             document.getElementById('adminName').textContent = localStorage.getItem('adminName');
-            
+
             loadDashboardData();
-            
+
             // Actualizar cada 30 segundos
             refreshInterval = setInterval(loadDashboardData, 30000);
         }
@@ -678,13 +714,13 @@
 
                 if (data.success) {
                     const stats = data.data;
-                    
+
                     document.getElementById('totalSessions').textContent = stats.total_sessions;
                     document.getElementById('totalNavigations').textContent = stats.total_navigations;
-                    
+
                     document.getElementById('mostVisitedName').textContent = stats.most_visited_poi?.name || '-';
                     document.getElementById('mostVisitedCount').textContent = `${stats.most_visited_poi?.visits || 0} visitas`;
-                    
+
                     document.getElementById('leastVisitedName').textContent = stats.least_visited_poi?.name || '-';
                     document.getElementById('leastVisitedCount').textContent = `${stats.least_visited_poi?.visits || 0} visitas`;
 
@@ -718,11 +754,11 @@
                 if (data.success) {
                     const tbody = document.querySelector('#poiRankingTable tbody');
                     tbody.innerHTML = '';
-                    
+
                     data.data.forEach((poi, index) => {
                         const minutes = Math.floor(poi.avg_duration_seconds / 60);
                         const seconds = poi.avg_duration_seconds % 60;
-                        
+
                         tbody.innerHTML += `
                             <tr>
                                 <td><strong class="accent-yellow">#${index + 1}</strong></td>
@@ -751,16 +787,16 @@
                 if (data.success) {
                     const tbody = document.querySelector('#recentNavigationsTable tbody');
                     tbody.innerHTML = '';
-                    
+
                     data.data.forEach(nav => {
                         const date = new Date(nav.navigation_timestamp);
                         const formattedDate = date.toLocaleString('es-CO');
                         const duration = nav.duration_seconds ? `${Math.floor(nav.duration_seconds / 60)}m ${nav.duration_seconds % 60}s` : 'N/A';
                         const distance = nav.distance_meters ? `${nav.distance_meters.toFixed(0)}m` : 'N/A';
-                        const status = nav.completed ? 
-                            '<span class="badge badge-success">Completado</span>' : 
+                        const status = nav.completed ?
+                            '<span class="badge badge-success">Completado</span>' :
                             '<span class="badge badge-warning">Incompleto</span>';
-                        
+
                         tbody.innerHTML += `
                             <tr>
                                 <td><strong>${nav.poi_name}</strong></td>
@@ -783,11 +819,11 @@
             localStorage.removeItem('authToken');
             localStorage.removeItem('adminName');
             authToken = null;
-            
+
             if (refreshInterval) {
                 clearInterval(refreshInterval);
             }
-            
+
             document.getElementById('dashboard').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('loginForm').reset();
@@ -803,4 +839,5 @@
         });
     </script>
 </body>
+
 </html>
