@@ -723,7 +723,7 @@ select:focus {
 }
 
 .info-icon-text {
-  font-size: 28px;
+  font-size: 33 px;
   font-weight: 800;
   color: var(--color-secondary);
   margin-bottom: 22px;
