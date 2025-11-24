@@ -22,7 +22,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #003366 0%, #FF6B00 100%);
+            background: linear-gradient(135deg, #003B7A 0%, #FFC107 100%);
         }
 
         .login-box {
@@ -33,8 +33,19 @@
             width: 400px;
         }
 
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header img {
+            max-width: 200px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
         .login-box h1 {
-            color: #003366;
+            color: #003B7A;
             margin-bottom: 10px;
             font-size: 28px;
         }
@@ -51,7 +62,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #003366;
+            color: #003B7A;
             font-weight: 500;
         }
 
@@ -66,13 +77,13 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #FF6B00;
+            border-color: #FFC107;
         }
 
         .btn-primary {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #FF6B00 0%, #003366 100%);
+            background: linear-gradient(135deg, #FFC107 0%, #003B7A 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -84,7 +95,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
         }
 
         .error-message {
@@ -102,17 +113,29 @@
         }
 
         .navbar {
-            background: #003366;
-            padding: 20px 40px;
+            background: #003B7A;
+            padding: 15px 40px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .navbar-logo {
+            height: 50px;
+            width: auto;
+        }
+
         .navbar h1 {
             color: white;
-            font-size: 24px;
+            font-size: 20px;
+            font-weight: 600;
         }
 
         .navbar-right {
@@ -127,17 +150,17 @@
 
         .btn-logout {
             padding: 10px 20px;
-            background: #FF6B00;
-            color: white;
+            background: #FFC107;
+            color: #003B7A;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
             transition: background 0.3s;
         }
 
         .btn-logout:hover {
-            background: #e55f00;
+            background: #FFD54F;
         }
 
         .container {
@@ -158,11 +181,11 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-left: 4px solid #FF6B00;
+            border-left: 4px solid #FFC107;
         }
 
         .stat-card h3 {
-            color: #003366;
+            color: #003B7A;
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 10px;
@@ -172,7 +195,7 @@
         .stat-card .value {
             font-size: 36px;
             font-weight: bold;
-            color: #FF6B00;
+            color: #FFC107;
             margin-bottom: 5px;
         }
 
@@ -187,11 +210,11 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 20px;
-            border-top: 3px solid #003366;
+            border-top: 3px solid #003B7A;
         }
 
         .card h2 {
-            color: #003366;
+            color: #003B7A;
             margin-bottom: 20px;
             font-size: 20px;
         }
@@ -204,10 +227,10 @@
         table th {
             text-align: left;
             padding: 12px;
-            background: #003366;
+            background: #003B7A;
             color: white;
             font-weight: 600;
-            border-bottom: 2px solid #FF6B00;
+            border-bottom: 2px solid #FFC107;
         }
 
         table td {
@@ -217,7 +240,7 @@
         }
 
         table tr:hover {
-            background: #fff8f3;
+            background: #FFFBEA;
         }
 
         .badge {
@@ -239,13 +262,13 @@
         }
 
         .badge-info {
-            background: #FFE5D1;
-            color: #FF6B00;
+            background: #FFF9E6;
+            color: #FFC107;
         }
 
         .badge-primary {
-            background: #E6EEF5;
-            color: #003366;
+            background: #E3F2FD;
+            color: #003B7A;
         }
 
         .loading {
@@ -255,12 +278,12 @@
         }
 
         /* Accent colors */
-        .accent-orange {
-            color: #FF6B00;
+        .accent-yellow {
+            color: #FFC107;
         }
 
         .accent-blue {
-            color: #003366;
+            color: #003B7A;
         }
 
         /* Responsive */
@@ -268,7 +291,20 @@
             .navbar {
                 flex-direction: column;
                 gap: 15px;
+                padding: 15px 20px;
+            }
+
+            .navbar-left {
+                flex-direction: column;
                 text-align: center;
+            }
+
+            .navbar h1 {
+                font-size: 16px;
+            }
+
+            .navbar-logo {
+                height: 40px;
             }
 
             .navbar-right {
@@ -302,6 +338,9 @@
     <!-- Login Screen -->
     <div id="loginScreen" class="login-container">
         <div class="login-box">
+            <div class="login-header">
+                <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/logo-usa-header.svg" alt="Universidad Sergio Arboleda" class="login-logo">
+            </div>
             <h1>Admin Login</h1>
             <p>Dashboard de Analíticas - Campus AR</p>
             
@@ -324,7 +363,10 @@
     <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
         <nav class="navbar">
-            <h1>📊 Campus AR Analytics - Universidad Sergio Arboleda</h1>
+            <div class="navbar-left">
+                <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/logo-usa-header.svg" alt="Universidad Sergio Arboleda" class="navbar-logo">
+                <h1>Campus AR Analytics</h1>
+            </div>
             <div class="navbar-right">
                 <span class="user-info">Bienvenido, <strong id="adminName"></strong></span>
                 <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
@@ -497,7 +539,7 @@
                             <tr>
                                 <td><strong>${item.type_name}</strong></td>
                                 <td>${item.count}</td>
-                                <td><strong class="accent-orange">${percentage}%</strong></td>
+                                <td><strong class="accent-yellow">${percentage}%</strong></td>
                             </tr>
                         `;
                     });
@@ -525,7 +567,7 @@
                         
                         tbody.innerHTML += `
                             <tr>
-                                <td><strong class="accent-orange">#${index + 1}</strong></td>
+                                <td><strong class="accent-yellow">#${index + 1}</strong></td>
                                 <td><strong>${poi.name}</strong></td>
                                 <td><span class="badge badge-info">${poi.category || 'N/A'}</span></td>
                                 <td>${poi.total_visits}</td>
