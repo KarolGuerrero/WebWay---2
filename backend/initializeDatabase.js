@@ -3,11 +3,10 @@ const bcrypt = require('bcrypt');
 
 // Configuración de conexión
 const client = new Client({
-  host: 'localhost',
-  port: 5432,
-  database: 'Webway',
-  user: 'postgres',
-  password: 'ALPXZVMspovGYMKjbXAeskPFPzVBeXKW' // CAMBIA ESTO
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // Tus POIs
