@@ -2,7 +2,7 @@
 import { populateUiAndReturnPois } from './app.js';
 import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './orientation.js';
 
-// --- GEODESY helpers
+// --- GEODESY helpers (sin cambios)
 const toRad = d => d * Math.PI/180;
 const toDeg = r => r * 180/Math.PI;
 function normalizeAngle(a){ return ((a%360)+360)%360; }
@@ -39,13 +39,16 @@ let pois = [];
 let currentDestination = null;
 let ENTRY_ORIGIN = { lat: null, lon: null };
 let watchId = null;
+
+// Tunables (ajustables)
 const ORIGIN_ACCEPT_RADIUS_M = 12;
 const GUIDE_AHEAD_METERS = 6;
-const ARRIVAL_DISTANCE_METERS = 4;
+let ARRIVAL_DISTANCE_METERS = 4; // valor base, se adaptará con accuracy
+const MIN_MOVEMENT = 1.5; // metros mínimo para contar movimiento
+const MAX_ACCEPTABLE_ACCURACY = 40; // descarta lecturas > esto (puedes subir si quieres)
 
 // ══════════════════════════════════════════════════════════════
 // TRACKING DE NAVEGACIÓN (NUEVO)
-// ══════════════════════════════════════════════════════════════
 let navigationStartTime = null;
 let navigationStartPosition = null;
 let totalDistanceTraveled = 0;
@@ -56,13 +59,15 @@ function startNavigationTracking(userLat, userLon) {
   navigationStartPosition = { lat: userLat, lon: userLon };
   lastPosition = { lat: userLat, lon: userLon };
   totalDistanceTraveled = 0;
-  console.log('📍 Tracking iniciado:', { poi: currentDestination.name, start: navigationStartPosition });
+  console.log('📍 Tracking iniciado:', { poi: currentDestination?.name, start: navigationStartPosition });
 }
 
 function updateNavigationDistance(userLat, userLon) {
   if (lastPosition) {
     const segmentDist = distanceMeters(lastPosition.lat, lastPosition.lon, userLat, userLon);
-    totalDistanceTraveled += segmentDist;
+    if (segmentDist >= MIN_MOVEMENT) {
+      totalDistanceTraveled += segmentDist;
+    } // si es menor que MIN_MOVEMENT -> se considera ruido y se ignora
   }
   lastPosition = { lat: userLat, lon: userLon };
 }
@@ -72,7 +77,6 @@ async function completeNavigationTracking(arrived = true) {
 
   const durationSeconds = Math.floor((Date.now() - navigationStartTime) / 1000);
 
-  // Registrar en el backend
   if (window.arAPI && window.arAPI.hasActiveSession()) {
     await window.arAPI.registerNavigation(currentDestination.id, {
       originLat: navigationStartPosition.lat,
@@ -90,13 +94,49 @@ async function completeNavigationTracking(arrived = true) {
     });
   }
 
-  // Resetear
   navigationStartTime = null;
   navigationStartPosition = null;
   totalDistanceTraveled = 0;
   lastPosition = null;
 }
 // ══════════════════════════════════════════════════════════════
+
+
+// --- KALMAN 1D (muy ligero) - para lat y lon por separado
+class SimpleKalman {
+  // x: estado (posición), P: varianza estado
+  // Q: process noise (variabilidad del sistema), inicializable
+  constructor({ initial = 0, initialP = 10, Q = 1 }) {
+    this.x = initial;
+    this.P = initialP;
+    this.Q = Q;
+  }
+
+  // z: medida (posición), R: varianza medida (accuracy^2)
+  update(z, R) {
+    // Predict
+    this.P = this.P + this.Q;
+
+    // Kalman gain
+    const K = this.P / (this.P + R);
+
+    // Update estimate
+    this.x = this.x + K * (z - this.x);
+    this.P = (1 - K) * this.P;
+
+    return this.x;
+  }
+
+  setState(x, P = null) {
+    this.x = x;
+    if (P !== null) this.P = P;
+  }
+}
+
+// filtros (inicializados en startGuidance)
+let kfLat = null;
+let kfLon = null;
+let headingSmooth = null;
 
 // DOM refs
 const infoDiv = () => document.getElementById('info');
@@ -105,11 +145,11 @@ const calibrateBtn = () => document.getElementById('calibrateBtn');
 const startBtn = () => document.getElementById('startBtn');
 const stopBtn = () => document.getElementById('stopBtn');
 
-// Read params from URL
+// Read params from URL (sin cambios)
 function readParams() {
   const p = new URLSearchParams(window.location.search);
   const dest = p.has('dest') ? parseInt(p.get('dest')) : null;
-  const origin = p.has('origin') ? (()=>{
+  const origin = p.has('origin') ? (()=> {
     const raw = p.get('origin').split(',').map(s=>s.trim());
     const lat = parseFloat(raw[0]), lon = parseFloat(raw[1]);
     if (!isNaN(lat) && !isNaN(lon)) return { lat, lon };
@@ -121,14 +161,13 @@ function readParams() {
 // init
 (async function init(){
   try {
-    pois = await populateUiAndReturnPoisForAR(); // loads pois & updates UI name if dest param present
+    pois = await populateUiAndReturnPoisForAR();
   } catch(e) {
     console.error('No se pudieron cargar POIs', e);
     infoDiv().textContent = 'Error cargando POIs.';
     return;
   }
 
-  // set entry origin if passed in URL (helps demo autocalibrate)
   const params = readParams();
   if (params.origin) {
     ENTRY_ORIGIN.lat = params.origin.lat;
@@ -136,7 +175,6 @@ function readParams() {
     console.log('ENTRY_ORIGIN from URL', ENTRY_ORIGIN);
   }
 
-  // Wire buttons
   calibrateBtn().addEventListener('click', async ()=> {
     const ok = await requestOrientationPermissionIfNeeded();
     if (!ok) alert('No se concedió permiso de orientación.');
@@ -147,26 +185,22 @@ function readParams() {
   startBtn().addEventListener('click', ensureAtOriginThenStart);
   stopBtn().addEventListener('click', stopGuidance);
 
-  // If dest param present, auto-select and attempt to start (demo mode)
   if (params.dest != null) {
     currentDestination = pois.find(p => p.id === params.dest);
     if (currentDestination) {
       document.getElementById('uiDestName').textContent = currentDestination.name;
-      // try to auto-start: if origin provided, check distance else prompt
       setTimeout(()=> handleAutoStartIfRequested(), 300);
     }
   }
 })();
 
-// --- Auto-start logic
+// --- Auto-start logic (sin cambios mayormente)
 async function handleAutoStartIfRequested(){
   if (!currentDestination) return;
   if (ENTRY_ORIGIN.lat === null) {
-    // no origin param, just prompt user to calibrate and start
     if (confirm('Iniciar guía hacia ' + currentDestination.name + '?')) ensureAtOriginThenStart();
     return;
   }
-  // try to get current pos and compare distance to entry origin
   if (!('geolocation' in navigator)) {
     if (confirm('No hay geolocalización. Iniciar demo de todas formas?')) startGuidance();
     return;
@@ -215,10 +249,9 @@ function ensureAtOriginThenStart() {
   }, { enableHighAccuracy:true, timeout:7000 });
 }
 
-// --- Start / Stop guidance
+// --- Start / Stop guidance (integración Kalman y filtros)
 function startGuidance() {
   if (!currentDestination) {
-    // if dest not set via param, try to read from UI name
     const name = document.getElementById('uiDestName').textContent;
     currentDestination = pois.find(p => p.name === name);
   }
@@ -227,23 +260,65 @@ function startGuidance() {
   infoDiv().textContent = `Destino: ${currentDestination.name}`;
 
   if (watchId) navigator.geolocation.clearWatch(watchId);
-  
-  // NUEVO: Iniciar tracking en la primera posición
+
+  // inicializar filtros (se actualizarán en la primera lectura real)
+  kfLat = null;
+  kfLon = null;
+  headingSmooth = null;
   let isFirstPosition = true;
-  
+
   watchId = navigator.geolocation.watchPosition(pos => {
-    const userLat = pos.coords.latitude, userLon = pos.coords.longitude;
-    
-    // NUEVO: Iniciar tracking en la primera posición
+    const rawLat = pos.coords.latitude;
+    const rawLon = pos.coords.longitude;
+    const accuracy = pos.coords.accuracy || 100;
+
+    // Mostrar precisión en UI (debug)
+    // (la actualización visual real la hace updateGuidance)
+    // Ignorar lecturas con accuracy excesivo
+    if (accuracy > MAX_ACCEPTABLE_ACCURACY) {
+      infoDiv().textContent = `Lectura GPS muy imprecisa (±${Math.round(accuracy)} m). Intentando mejorar...`;
+      return;
+    }
+
+    // Inicializar Kalman con la primera lectura
+    if (!kfLat) {
+      kfLat = new SimpleKalman({ initial: rawLat, initialP: accuracy*accuracy, Q: 1e-7 });
+      kfLon = new SimpleKalman({ initial: rawLon, initialP: accuracy*accuracy, Q: 1e-7 });
+      headingSmooth = null;
+    }
+
+    // R (varianza medida) tomada de la accuracy
+    const R = Math.max(1, accuracy * accuracy);
+
+    // actualizar Kalman (1D por componente)
+    const filtLat = kfLat.update(rawLat, R);
+    const filtLon = kfLon.update(rawLon, R);
+
+    // Suavizar heading (brújula) con exponencial simple
+    const rawHeading = getCurrentHeading(); // puede ser null
+    if (rawHeading !== null) {
+      if (headingSmooth === null) headingSmooth = rawHeading;
+      else {
+        const alpha = 0.3; // suavizado, 0..1 (sube si quieres menos lag)
+        // manejo circular teclado (360->0)
+        const diff = angleDiffSigned(rawHeading, headingSmooth);
+        headingSmooth = normalizeAngle(headingSmooth + alpha * diff);
+      }
+    }
+
+    // ARRIVAL adaptativo: si la precision es mala, aumenta el radio de llegada
+    const adaptiveArrival = Math.max(ARRIVAL_DISTANCE_METERS, Math.round(accuracy * 0.6));
+
+    // Si primera posición -> iniciar tracking
     if (isFirstPosition) {
-      startNavigationTracking(userLat, userLon);
+      startNavigationTracking(filtLat, filtLon);
       isFirstPosition = false;
     } else {
-      // NUEVO: Actualizar distancia recorrida
-      updateNavigationDistance(userLat, userLon);
+      updateNavigationDistance(filtLat, filtLon);
     }
-    
-    updateGuidance(userLat, userLon);
+
+    // Llama a updateGuidance pasando accuracy y heading suavizado
+    updateGuidance(filtLat, filtLon, { accuracy, heading: headingSmooth, adaptiveArrival });
   }, err => {
     console.error('geo error', err);
     infoDiv().textContent = 'Error de geolocalización: ' + (err.message || err);
@@ -255,59 +330,62 @@ function startGuidance() {
 }
 
 function stopGuidance(){
-  if (watchId) { 
-    navigator.geolocation.clearWatch(watchId); 
-    watchId = null; 
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
   }
-  
-  // NUEVO: Registrar navegación como incompleta si se detiene manualmente
+
   if (navigationStartTime) {
     completeNavigationTracking(false);
   }
-  
+
   infoDiv().textContent = 'Guía detenida.';
   startBtn().style.display = 'inline-block';
   stopBtn().style.display = 'none';
   arrowEl().setAttribute('visible','false');
 }
 
-// --- updateGuidance: compute dist, bearing, arrow placement + rotation based on device heading
-function updateGuidance(userLat, userLon) {
+// --- updateGuidance: ahora acepta opciones con accuracy, heading y adaptiveArrival
+function updateGuidance(userLat, userLon, opts = {}) {
   const destLat = currentDestination.lat, destLon = currentDestination.lon;
   const dist = distanceMeters(userLat, userLon, destLat, destLon);
   const bear = bearingDegrees(userLat, userLon, destLat, destLon);
-  infoDiv().innerHTML = `Destino: <b>${currentDestination.name}</b><br>Distancia: ${Math.round(dist)} m<br>Rumbo: ${Math.round(bear)}°`;
 
-  if (dist <= ARRIVAL_DISTANCE_METERS) {
+  const accuracy = opts.accuracy || 0;
+  const heading = (opts.heading === undefined ? null : opts.heading);
+  const adaptiveArrival = opts.adaptiveArrival || ARRIVAL_DISTANCE_METERS;
+
+  infoDiv().innerHTML = `Destino: <b>${currentDestination.name}</b><br>
+    Distancia: ${Math.round(dist)} m<br>
+    Rumbo: ${Math.round(bear)}°<br>
+    Precisión GPS: ±${Math.round(accuracy)} m<br>
+    Umbral llegada: ${adaptiveArrival} m`;
+
+  // llegada con umbral adaptativo
+  if (dist <= adaptiveArrival) {
     infoDiv().innerHTML += '<br><b>Has llegado 🎉</b>';
-    
-    // NUEVO: Registrar navegación como completada
     completeNavigationTracking(true);
-    
     stopGuidance();
     return;
   }
 
-  // compute point a few meters ahead in direction (to place arrow)
+  // punto algunos metros adelante para colocar la flecha (igual que antes)
   const targetPt = destPoint(userLat, userLon, bear, GUIDE_AHEAD_METERS);
 
-  // position arrow using gps-entity-place semantics
   const arrow = arrowEl();
   arrow.setAttribute('gps-entity-place', `latitude: ${targetPt.lat}; longitude: ${targetPt.lon};`);
 
-  // rotate arrow so it visually points towards destination taking device heading into account
-  const heading = getCurrentHeading(); // from orientation module; may be null
+  // computar yaw con heading suavizado si disponible
   let yaw;
   if (heading !== null) {
-    const diff = angleDiffSigned(bear, heading); // -180..180
-    yaw = -diff; // sign may be flipped depending on model; adjust if points opposite
+    const diff = angleDiffSigned(bear, heading);
+    yaw = -diff;
   } else {
-    // fallback: set arrow yaw to face bearing (relative to world north); this may appear rotated if device heading unknown
     yaw = (bear + 180) % 360;
   }
   arrow.setAttribute('rotation', `0 ${yaw} 0`);
 
-  // scale arrow by distance (visual)
+  // escala visual
   const scale = Math.min(3, Math.max(0.8, dist / 30));
   arrow.setAttribute('scale', `${scale} ${scale} ${scale}`);
 }
