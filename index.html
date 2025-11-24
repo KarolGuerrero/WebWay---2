@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebWay - Demo Campus</title>
   <link rel="stylesheet" href="styles/styles.css">
-  
 </head>
 <body>
   <!-- Pantalla de selección de tipo de usuario -->
   <div id="userSelectionScreen" class="user-selection-screen">
     <div class="selection-container">
       <div class="selection-logo">
-        <h1>🎯 WebWay AR</h1>
+        <h1>WebWay AR</h1>
         <p>Universidad Sergio Arboleda</p>
       </div>
 
@@ -26,11 +25,11 @@
       </div>
 
       <div id="loadingSpinner" class="loading-spinner">
-        <p>⏳ Cargando...</p>
+        <p>Cargando...</p>
       </div>
 
       <div id="errorMessage" class="error-message">
-        ❌ No se pudo conectar al servidor. Verifica tu conexión.
+        No se pudo conectar al servidor. Verifica tu conexión.
       </div>
     </div>
   </div>
@@ -38,18 +37,15 @@
   <!-- Contenido principal -->
   <header>
     <div class="header-content">
-      <h1>🧭 WebWay - Navegación Campus</h1>
+      <h1>WebWay - Navegación Campus</h1>
       <p>Selecciona tu destino para comenzar tu recorrido AR</p>
     </div>
-    <a href="admin/dashboard.html" class="admin-btn">
-      <span>🔐</span>
-      <span>Admin</span>
-    </a>
+    <a href="admin/dashboard.html" class="admin-btn">Admin</a>
   </header>
 
   <main>
     <section class="selection-panel">
-      <h2>📍 Selecciona tu Destino</h2>
+      <h2>Selecciona tu Destino</h2>
       <p>Elige el lugar al que deseas navegar en el campus</p>
 
       <label for="destino">Destino:</label>
@@ -62,16 +58,13 @@
       </div>
 
       <div class="button-group">
-        <button id="btnAR" class="btn btn-primary">
-          <span>🎯</span>
-          <span>Iniciar Navegación AR</span>
-        </button>
+        <button id="btnAR" class="btn btn-primary">Iniciar Navegación AR</button>
       </div>
     </section>
   </main>
 
   <footer>
-    <p>WebWay AR - Universidad Sergio Arboleda © 2024</p>
+    <p>WebWay AR - Universidad Sergio Arboleda &copy; 2024</p>
     <p style="margin-top: 10px; font-size: 12px;">Sistema de navegación con Giroscopio y GPS</p>
   </footer>
 
@@ -80,13 +73,9 @@
   <script type="module">
     import { loadPois, populateDestSelectInIndex } from './scripts/app.js';
 
-    // ═══════════════════════════════════════════════════════════
-    // GESTIÓN DE SELECCIÓN DE USUARIO
-    // ═══════════════════════════════════════════════════════════
-
     const userTypeIcons = {
-      'visitante': '🎒',
-      'estudiante': '📚',
+      'visitante': '👤',
+      'estudiante': '📖',
       'trabajador': '💼'
     };
 
@@ -95,15 +84,12 @@
     const loadingSpinner = document.getElementById('loadingSpinner');
     const errorMessage = document.getElementById('errorMessage');
 
-    // Inicializar selección de usuario
     async function initUserSelection() {
-      // Si ya hay sesión activa, saltar selección
       if (arAPI.restoreSession()) {
         showMainContent();
         return;
       }
 
-      // Cargar tipos de usuario
       loadingSpinner.classList.add('active');
       const userTypes = await arAPI.getUserTypes();
       loadingSpinner.classList.remove('active');
@@ -113,14 +99,12 @@
         return;
       }
 
-      // Crear botones
       userTypes.forEach(userType => {
         const button = createUserTypeButton(userType);
         userTypeButtons.appendChild(button);
       });
     }
 
-    // Crear botón de tipo de usuario
     function createUserTypeButton(userType) {
       const button = document.createElement('div');
       button.className = 'user-type-btn';
@@ -139,9 +123,7 @@
       return button;
     }
 
-    // Seleccionar tipo de usuario
     async function selectUserType(userTypeId, buttonElement) {
-      // Deshabilitar todos los botones
       document.querySelectorAll('.user-type-btn').forEach(btn => {
         btn.classList.add('loading');
       });
@@ -149,23 +131,19 @@
       loadingSpinner.classList.add('active');
       errorMessage.classList.remove('active');
 
-      // Iniciar sesión
       const success = await arAPI.startSession(userTypeId);
 
       if (success) {
-        // Animación de éxito
         buttonElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
         buttonElement.style.color = 'white';
         buttonElement.querySelector('.user-type-content h3').style.color = 'white';
         buttonElement.querySelector('.user-type-content p').style.color = 'white';
 
-        // Esperar un momento y mostrar contenido principal
         setTimeout(() => {
           showMainContent();
           initApp();
         }, 500);
       } else {
-        // Error
         loadingSpinner.classList.remove('active');
         errorMessage.classList.add('active');
         document.querySelectorAll('.user-type-btn').forEach(btn => {
@@ -174,20 +152,14 @@
       }
     }
 
-    // Mostrar contenido principal
     function showMainContent() {
       selectionScreen.classList.add('hidden');
       document.body.classList.add('session-active');
     }
 
-    // Utilidad
     function capitalizeFirst(str) {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
-
-    // ═══════════════════════════════════════════════════════════
-    // TU CÓDIGO ORIGINAL DE LA APP
-    // ═══════════════════════════════════════════════════════════
 
     class App {
       constructor() {
@@ -209,7 +181,6 @@
           this.lugares = await loadPois();
         } catch (error) {
           console.error('Error cargando lugares:', error);
-          // Datos de respaldo
           this.lugares = [
             { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797, "description": "Edificio principal de aulas" },
             { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924, "description": "Centro de recursos académicos" },
@@ -223,11 +194,7 @@
         if (!select) return;
 
         populateDestSelectInIndex(this.lugares, select);
-
-        // Mostrar descripción al cambiar selección
         select.addEventListener('change', () => this.mostrarDescripcion());
-
-        // Configurar botón AR
         document.getElementById('btnAR').addEventListener('click', () => this.irAAR());
       }
 
@@ -292,12 +259,10 @@
       }
     }
 
-    // Inicializar la app solo después de selección de usuario
     function initApp() {
       new App();
     }
 
-    // Iniciar selección de usuario cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
       initUserSelection();
     });
