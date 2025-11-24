@@ -16,13 +16,13 @@
             background: #f5f7fa;
         }
 
-        /* Login Screen */
+        /* Login Screen - Colores Universidad Sergio Arboleda */
         .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #003366 0%, #FF6B00 100%);
         }
 
         .login-box {
@@ -34,7 +34,7 @@
         }
 
         .login-box h1 {
-            color: #333;
+            color: #003366;
             margin-bottom: 10px;
             font-size: 28px;
         }
@@ -51,7 +51,7 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #003366;
             font-weight: 500;
         }
 
@@ -66,13 +66,13 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #FF6B00;
         }
 
         .btn-primary {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #FF6B00 0%, #003366 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -84,6 +84,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
         }
 
         .error-message {
@@ -101,7 +102,7 @@
         }
 
         .navbar {
-            background: white;
+            background: #003366;
             padding: 20px 40px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
@@ -110,7 +111,7 @@
         }
 
         .navbar h1 {
-            color: #333;
+            color: white;
             font-size: 24px;
         }
 
@@ -121,17 +122,22 @@
         }
 
         .user-info {
-            color: #666;
+            color: white;
         }
 
         .btn-logout {
             padding: 10px 20px;
-            background: #e74c3c;
+            background: #FF6B00;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #e55f00;
         }
 
         .container {
@@ -152,12 +158,13 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #FF6B00;
         }
 
         .stat-card h3 {
-            color: #666;
+            color: #003366;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 10px;
             text-transform: uppercase;
         }
@@ -165,12 +172,12 @@
         .stat-card .value {
             font-size: 36px;
             font-weight: bold;
-            color: #333;
+            color: #FF6B00;
             margin-bottom: 5px;
         }
 
         .stat-card .label {
-            color: #999;
+            color: #666;
             font-size: 14px;
         }
 
@@ -180,10 +187,11 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-bottom: 20px;
+            border-top: 3px solid #003366;
         }
 
         .card h2 {
-            color: #333;
+            color: #003366;
             margin-bottom: 20px;
             font-size: 20px;
         }
@@ -196,10 +204,10 @@
         table th {
             text-align: left;
             padding: 12px;
-            background: #f8f9fa;
-            color: #666;
+            background: #003366;
+            color: white;
             font-weight: 600;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 2px solid #FF6B00;
         }
 
         table td {
@@ -209,7 +217,7 @@
         }
 
         table tr:hover {
-            background: #f8f9fa;
+            background: #fff8f3;
         }
 
         .badge {
@@ -231,14 +239,62 @@
         }
 
         .badge-info {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: #FFE5D1;
+            color: #FF6B00;
+        }
+
+        .badge-primary {
+            background: #E6EEF5;
+            color: #003366;
         }
 
         .loading {
             text-align: center;
             padding: 40px;
             color: #666;
+        }
+
+        /* Accent colors */
+        .accent-orange {
+            color: #FF6B00;
+        }
+
+        .accent-blue {
+            color: #003366;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .navbar-right {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-logout {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px 10px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            table th, table td {
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -268,7 +324,7 @@
     <!-- Dashboard -->
     <div id="dashboard" class="dashboard">
         <nav class="navbar">
-            <h1>📊 Campus AR Analytics</h1>
+            <h1>📊 Campus AR Analytics - Universidad Sergio Arboleda</h1>
             <div class="navbar-right">
                 <span class="user-info">Bienvenido, <strong id="adminName"></strong></span>
                 <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
@@ -439,9 +495,9 @@
                         const percentage = ((item.count / stats.total_sessions) * 100).toFixed(1);
                         tbody.innerHTML += `
                             <tr>
-                                <td>${item.type_name}</td>
+                                <td><strong>${item.type_name}</strong></td>
                                 <td>${item.count}</td>
-                                <td><strong>${percentage}%</strong></td>
+                                <td><strong class="accent-orange">${percentage}%</strong></td>
                             </tr>
                         `;
                     });
@@ -469,8 +525,8 @@
                         
                         tbody.innerHTML += `
                             <tr>
-                                <td><strong>#${index + 1}</strong></td>
-                                <td>${poi.name}</td>
+                                <td><strong class="accent-orange">#${index + 1}</strong></td>
+                                <td><strong>${poi.name}</strong></td>
                                 <td><span class="badge badge-info">${poi.category || 'N/A'}</span></td>
                                 <td>${poi.total_visits}</td>
                                 <td>${poi.unique_visitors}</td>
@@ -507,7 +563,7 @@
                         
                         tbody.innerHTML += `
                             <tr>
-                                <td>${nav.poi_name}</td>
+                                <td><strong>${nav.poi_name}</strong></td>
                                 <td>${nav.user_type}</td>
                                 <td>${formattedDate}</td>
                                 <td>${duration}</td>

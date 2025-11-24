@@ -2,6 +2,7 @@
 import { populateUiAndReturnPois } from './app.js';
 import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './orientation.js';
 
+
 // --- GEODESY helpers
 const toRad = d => d * Math.PI/180;
 const toDeg = r => r * 180/Math.PI;
@@ -39,116 +40,9 @@ let pois = [];
 let currentDestination = null;
 let ENTRY_ORIGIN = { lat: null, lon: null };
 let watchId = null;
-let lastPosition = null; // NUEVO: Para guardar precisión GPS
 const ORIGIN_ACCEPT_RADIUS_M = 12;
 const GUIDE_AHEAD_METERS = 6;
-const ARRIVAL_DISTANCE_METERS = 15; // AUMENTADO de 4 a 15 metros
-
-// ══════════════════════════════════════════════════════════════
-// TRACKING DE NAVEGACIÓN
-// ══════════════════════════════════════════════════════════════
-let navigationStartTime = null;
-let navigationStartPosition = null;
-let totalDistanceTraveled = 0;
-let lastTrackedPosition = null;
-
-function startNavigationTracking(userLat, userLon) {
-  navigationStartTime = Date.now();
-  navigationStartPosition = { lat: userLat, lon: userLon };
-  lastTrackedPosition = { lat: userLat, lon: userLon };
-  totalDistanceTraveled = 0;
-  console.log('📍 Tracking iniciado:', { poi: currentDestination.name, start: navigationStartPosition });
-}
-
-let lastUpdateTime = null;
-let navigationActive = true;
-
-function updateNavigationDistance(userLat, userLon) {
-  // Si la navegación ya no está activa, no seguir sumando
-  if (!navigationActive) return;
-  
-  const now = Date.now();
-  
-  if (lastTrackedPosition && lastUpdateTime) {
-    const segmentDist = distanceMeters(
-      lastTrackedPosition.lat, 
-      lastTrackedPosition.lon, 
-      userLat, 
-      userLon
-    );
-    
-    const timeElapsed = (now - lastUpdateTime) / 1000; // segundos
-    
-    // Evitar división por cero
-    if (timeElapsed < 0.5) return; // Ignorar updates muy frecuentes
-    
-    const speed = segmentDist / timeElapsed; // m/s
-    
-    // Criterios para contar el movimiento:
-    // 1. Movimiento significativo (>= 3m) - filtra ruido GPS
-    // 2. Movimiento razonable (< 50m en un update) - evita saltos GPS
-    // 3. Velocidad humana razonable (0.5 a 10 m/s = 1.8 a 36 km/h)
-    if (segmentDist >= 3 && segmentDist < 50 && speed >= 0.5 && speed <= 10) {
-      totalDistanceTraveled += segmentDist;
-      lastTrackedPosition = { lat: userLat, lon: userLon };
-      lastUpdateTime = now;
-      console.log(`📏 +${segmentDist.toFixed(1)}m | Total: ${totalDistanceTraveled.toFixed(1)}m | Velocidad: ${speed.toFixed(1)}m/s`);
-    } else if (segmentDist >= 50 || speed > 10) {
-      // Salto GPS detectado - actualizar posición sin sumar distancia
-      console.warn('⚠️ Salto GPS detectado:', segmentDist.toFixed(1), 'm en', timeElapsed.toFixed(1), 's');
-      lastTrackedPosition = { lat: userLat, lon: userLon };
-      lastUpdateTime = now;
-    }
-  } else {
-    // Primera posición
-    lastTrackedPosition = { lat: userLat, lon: userLon };
-    lastUpdateTime = now;
-  }
-}
-
-// Y al llegar:
-if (dist <= arrivalRadius) {
-  // Detener tracking inmediatamente
-  navigationActive = false;
-  
-  infoHTML += '<br><b style="color: #4CAF50;">✅ ¡Has llegado!</b>';
-  infoDiv().innerHTML = infoHTML;
-  
-  completeNavigationTracking(true);
-  stopGuidance();
-  return;
-}
-
-async function completeNavigationTracking(arrived = true) {
-  if (!navigationStartTime || !navigationStartPosition) return;
-
-  const durationSeconds = Math.floor((Date.now() - navigationStartTime) / 1000);
-
-  // Registrar en el backend
-  if (window.arAPI && window.arAPI.hasActiveSession()) {
-    await window.arAPI.registerNavigation(currentDestination.id, {
-      originLat: navigationStartPosition.lat,
-      originLon: navigationStartPosition.lon,
-      duration: durationSeconds,
-      distance: Math.round(totalDistanceTraveled),
-      completed: arrived
-    });
-
-    console.log('✅ Navegación registrada:', {
-      poi: currentDestination.name,
-      duration: durationSeconds + 's',
-      distance: Math.round(totalDistanceTraveled) + 'm',
-      completed: arrived
-    });
-  }
-
-  // Resetear
-  navigationStartTime = null;
-  navigationStartPosition = null;
-  totalDistanceTraveled = 0;
-  lastTrackedPosition = null;
-}
-// ══════════════════════════════════════════════════════════════
+const ARRIVAL_DISTANCE_METERS = 4;
 
 // DOM refs
 const infoDiv = () => document.getElementById('info');
@@ -173,13 +67,14 @@ function readParams() {
 // init
 (async function init(){
   try {
-    pois = await populateUiAndReturnPoisForAR();
+    pois = await populateUiAndReturnPoisForAR(); // loads pois & updates UI name if dest param present
   } catch(e) {
     console.error('No se pudieron cargar POIs', e);
     infoDiv().textContent = 'Error cargando POIs.';
     return;
   }
 
+  // set entry origin if passed in URL (helps demo autocalibrate)
   const params = readParams();
   if (params.origin) {
     ENTRY_ORIGIN.lat = params.origin.lat;
@@ -187,6 +82,7 @@ function readParams() {
     console.log('ENTRY_ORIGIN from URL', ENTRY_ORIGIN);
   }
 
+  // Wire buttons
   calibrateBtn().addEventListener('click', async ()=> {
     const ok = await requestOrientationPermissionIfNeeded();
     if (!ok) alert('No se concedió permiso de orientación.');
@@ -197,21 +93,26 @@ function readParams() {
   startBtn().addEventListener('click', ensureAtOriginThenStart);
   stopBtn().addEventListener('click', stopGuidance);
 
+  // If dest param present, auto-select and attempt to start (demo mode)
   if (params.dest != null) {
     currentDestination = pois.find(p => p.id === params.dest);
     if (currentDestination) {
       document.getElementById('uiDestName').textContent = currentDestination.name;
+      // try to auto-start: if origin provided, check distance else prompt
       setTimeout(()=> handleAutoStartIfRequested(), 300);
     }
   }
 })();
 
+// --- Auto-start logic
 async function handleAutoStartIfRequested(){
   if (!currentDestination) return;
   if (ENTRY_ORIGIN.lat === null) {
+    // no origin param, just prompt user to calibrate and start
     if (confirm('Iniciar guía hacia ' + currentDestination.name + '?')) ensureAtOriginThenStart();
     return;
   }
+  // try to get current pos and compare distance to entry origin
   if (!('geolocation' in navigator)) {
     if (confirm('No hay geolocalización. Iniciar demo de todas formas?')) startGuidance();
     return;
@@ -235,6 +136,7 @@ async function handleAutoStartIfRequested(){
   }
 }
 
+// --- Ensure at origin
 function ensureAtOriginThenStart() {
   if (!currentDestination) {
     alert('Selecciona un destino');
@@ -259,8 +161,10 @@ function ensureAtOriginThenStart() {
   }, { enableHighAccuracy:true, timeout:7000 });
 }
 
+// --- Start / Stop guidance
 function startGuidance() {
   if (!currentDestination) {
+    // if dest not set via param, try to read from UI name
     const name = document.getElementById('uiDestName').textContent;
     currentDestination = pois.find(p => p.name === name);
   }
@@ -269,29 +173,8 @@ function startGuidance() {
   infoDiv().textContent = `Destino: ${currentDestination.name}`;
 
   if (watchId) navigator.geolocation.clearWatch(watchId);
-  
-  // NUEVO: Variable para tracking de primera posición
-  let isFirstPosition = true;
-  
   watchId = navigator.geolocation.watchPosition(pos => {
     const userLat = pos.coords.latitude, userLon = pos.coords.longitude;
-    
-    // Guardar precisión GPS
-    lastPosition = { 
-      lat: userLat, 
-      lon: userLon, 
-      accuracy: pos.coords.accuracy 
-    };
-    
-    // NUEVO: Iniciar tracking en la primera posición
-    if (isFirstPosition) {
-      startNavigationTracking(userLat, userLon);
-      isFirstPosition = false;
-    } else {
-      // NUEVO: Actualizar distancia recorrida
-      updateNavigationDistance(userLat, userLon);
-    }
-    
     updateGuidance(userLat, userLon);
   }, err => {
     console.error('geo error', err);
@@ -304,55 +187,25 @@ function startGuidance() {
 }
 
 function stopGuidance(){
-  if (watchId) { 
-    navigator.geolocation.clearWatch(watchId); 
-    watchId = null; 
-  }
-  
-  // NUEVO: Registrar navegación como incompleta si se detiene manualmente
-  if (navigationStartTime) {
-    completeNavigationTracking(false);
-  }
-  
+  if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   infoDiv().textContent = 'Guía detenida.';
   startBtn().style.display = 'inline-block';
   stopBtn().style.display = 'none';
   arrowEl().setAttribute('visible','false');
 }
 
-// ACTUALIZADO: updateGuidance con radio dinámico
+// --- updateGuidance: compute dist, bearing, arrow placement + rotation based on device heading
 function updateGuidance(userLat, userLon) {
   const destLat = currentDestination.lat, destLon = currentDestination.lon;
   const dist = distanceMeters(userLat, userLon, destLat, destLon);
   const bear = bearingDegrees(userLat, userLon, destLat, destLon);
-  
-  // Obtener precisión GPS actual
-  const accuracy = lastPosition?.accuracy || 10;
-  
-  // Radio de llegada dinámico: mayor si GPS es impreciso
-  const arrivalRadius = Math.max(ARRIVAL_DISTANCE_METERS, accuracy * 1.5);
-  
-  // Info básica
-  let infoHTML = `Destino: <b>${currentDestination.name}</b><br>Distancia: ${Math.round(dist)} m<br>Rumbo: ${Math.round(bear)}°`;
-  
-  // Mostrar cuando estás cerca
-  if (dist <= arrivalRadius * 2 && dist > arrivalRadius) {
-    infoHTML += '<br><span style="color: orange; font-weight: bold;">🎯 ¡Muy cerca! Sigue avanzando</span>';
-  }
+  infoDiv().innerHTML = `Destino: <b>${currentDestination.name}</b><br>Distancia: ${Math.round(dist)} m<br>Rumbo: ${Math.round(bear)}°`;
 
-  // Llegada al destino
-  if (dist <= arrivalRadius) {
-    infoHTML += '<br><b style="color: #4CAF50;">✅ ¡Has llegado!</b>';
-    infoDiv().innerHTML = infoHTML;
-    
-    // NUEVO: Registrar navegación como completada
-    completeNavigationTracking(true);
-    
+  if (dist <= ARRIVAL_DISTANCE_METERS) {
+    infoDiv().innerHTML += '<br><b>Has llegado 🎉</b>';
     stopGuidance();
     return;
   }
-  
-  infoDiv().innerHTML = infoHTML;
 
   // compute point a few meters ahead in direction (to place arrow)
   const targetPt = destPoint(userLat, userLon, bear, GUIDE_AHEAD_METERS);
@@ -362,12 +215,13 @@ function updateGuidance(userLat, userLon) {
   arrow.setAttribute('gps-entity-place', `latitude: ${targetPt.lat}; longitude: ${targetPt.lon};`);
 
   // rotate arrow so it visually points towards destination taking device heading into account
-  const heading = getCurrentHeading();
+  const heading = getCurrentHeading(); // from orientation module; may be null
   let yaw;
   if (heading !== null) {
-    const diff = angleDiffSigned(bear, heading);
-    yaw = -diff;
+    const diff = angleDiffSigned(bear, heading); // -180..180
+    yaw = -diff; // sign may be flipped depending on model; adjust if points opposite
   } else {
+    // fallback: set arrow yaw to face bearing (relative to world north); this may appear rotated if device heading unknown
     yaw = (bear + 180) % 360;
   }
   arrow.setAttribute('rotation', `0 ${yaw} 0`);
