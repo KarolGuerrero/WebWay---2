@@ -134,49 +134,37 @@ class ARAnalyticsAPI {
     /**
      * Registrar navegación a un POI
      */
-    async registerNavigation(poiId, navigationData) {
-        if (!this.hasActiveSession()) {
-            console.warn('No hay sesión activa para registrar navegación');
-            return false;
-        }
-
-        // NUEVO: Evitar registros duplicados
-        const navigationKey = `nav_${this.sessionId}_${poiId}_${Date.now()}`;
-        if (sessionStorage.getItem(navigationKey)) {
-            console.warn('Navegación ya registrada, evitando duplicado');
-            return true;
+    async registerNavigation(poiId, options = {}) {
+        if (!this.sessionId) {
+            console.warn('No hay sesión activa');
+            return;
         }
 
         try {
-            const response = await fetch(`${this.baseUrl}/navigations`, {
+            const navigationData = {
+                session_id: this.sessionId,
+                poi_id: poiId,
+                user_type_id: this.userTypeId,
+                origin_latitude: options.originLat || null,
+                origin_longitude: options.originLon || null,
+                duration_seconds: options.duration || null,
+                distance_meters: options.distance || null,
+                completed: options.completed !== undefined ? options.completed : true
+            };
+
+            const response = await fetch(`${API_BASE_URL}/navigation`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    session_id: this.sessionId,
-                    poi_id: poiId,
-                    origin_lat: navigationData.originLat,
-                    origin_lon: navigationData.originLon,
-                    navigation_timestamp: new Date().toISOString(),
-                    duration_seconds: navigationData.duration || 0,
-                    distance_meters: navigationData.distance || 0,
-                    completed: navigationData.completed || false
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(navigationData)
             });
 
             const data = await response.json();
 
             if (data.success) {
-                console.log('✅ Navegación registrada:', data.data);
-                // NUEVO: Marcar como registrado
-                sessionStorage.setItem(navigationKey, 'true');
-                return true;
+                console.log('✅ Navegación registrada:', poiId);
             }
-            return false;
         } catch (error) {
             console.error('Error registrando navegación:', error);
-            return false;
         }
     }
 
