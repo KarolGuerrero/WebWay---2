@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AR Wayfinding - WebWay</title>
   
-  <!-- Three.js para 3D -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   
   <style>
@@ -151,49 +150,40 @@
   </style>
 </head>
 <body>
-  <!-- Video de la cámara -->
   <div id="camera-container">
     <video id="camera-video" autoplay playsinline></video>
   </div>
 
-  <!-- Canvas de Three.js para la flecha 3D -->
   <div id="threejs-container"></div>
 
-  <!-- GPS Quality Indicator -->
   <div class="gps-quality">
     <div id="gps-quality-text">GPS: --</div>
   </div>
 
-  <!-- Compás overlay -->
   <div class="compass-overlay">
     <span id="compass-direction">N</span>
   </div>
 
-  <!-- Panel de información -->
   <div class="info-panel">
-    <h3 style="margin: 0 0 10px 0;">🧭 Navegación por Orientación</h3>
+    <h3 style="margin: 0 0 10px 0;">Navegación por Orientación</h3>
     <p id="status-text">Inicializando...</p>
     <div id="debug" class="debug-info"></div>
     <button class="btn" onclick="window.location.href='index.html'">Volver</button>
     <button class="btn btn-secondary" id="calibrate-btn">Calibrar Brújula</button>
   </div>
 
-  <!-- Loading -->
   <div id="loading" class="loading">
     <div class="spinner"></div>
     <p>Inicializando sensores...</p>
   </div>
 
-  <!-- NUEVO: Script de API -->
   <script src="scripts/api.js"></script>
 
   <script type="module">
     import { populateUiAndReturnPoisForAR } from './scripts/app.js';
     import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './scripts/orientation.js';
 
-    // ══════════════════════════════════════════════════════════════
-    // VERIFICAR SESIÓN ACTIVA (NUEVO)
-    // ══════════════════════════════════════════════════════════════
+    // Verificar sesión activa
     if (!window.arAPI || !window.arAPI.restoreSession()) {
       alert('No hay sesión activa. Redirigiendo...');
       window.location.href = 'index.html';
@@ -290,9 +280,7 @@
         this.compassDirection = null;
         this.gpsQualityText = null;
         
-        // ══════════════════════════════════════════════════════════════
-        // TRACKING DE NAVEGACIÓN (NUEVO)
-        // ══════════════════════════════════════════════════════════════
+        // Tracking de navegación
         this.navigationStartTime = null;
         this.navigationStartPosition = null;
         this.totalDistanceTraveled = 0;
@@ -304,7 +292,7 @@
 
       async init() {
         try {
-          console.log('🧭 Iniciando Navegación por Orientación...');
+          console.log('Iniciando Navegación por Orientación...');
           
           await this.cargarDestino();
           this.configurarElementosDOM();
@@ -320,14 +308,12 @@
           document.getElementById('loading').style.display = 'none';
           
         } catch (error) {
-          console.error('❌ Error:', error);
+          console.error('Error:', error);
           this.mostrarError('Error: ' + error.message);
         }
       }
 
-      // ══════════════════════════════════════════════════════════════
-      // MÉTODOS DE TRACKING (NUEVO)
-      // ══════════════════════════════════════════════════════════════
+      // MÉTODOS DE TRACKING
       
       startNavigationTracking(userLat, userLon) {
         this.navigationStartTime = Date.now();
@@ -349,7 +335,6 @@
             userLat, 
             userLon
           );
-          // Solo contar si el movimiento es razonable (menos de 50m entre updates)
           if (segmentDist < 50) {
             this.totalDistanceTraveled += segmentDist;
           }
@@ -365,7 +350,6 @@
         this.navigationActive = false;
         const durationSeconds = Math.floor((Date.now() - this.navigationStartTime) / 1000);
 
-        // Registrar en el backend
         if (window.arAPI && window.arAPI.hasActiveSession()) {
           await window.arAPI.registerNavigation(this.destino.id, {
             originLat: this.navigationStartPosition.lat,
@@ -383,7 +367,6 @@
           });
         }
 
-        // Resetear
         this.navigationStartTime = null;
         this.navigationStartPosition = null;
         this.totalDistanceTraveled = 0;
@@ -399,8 +382,8 @@
           if (destId !== null) {
             this.destino = pois.find(p => p.id === destId);
             if (this.destino) {
-              console.log('🎯 Destino:', this.destino);
-              this.actualizarEstado(`🎯 <b>${this.destino.name}</b><br>Iniciando sensores...`);
+              console.log('Destino:', this.destino);
+              this.actualizarEstado(`<b>${this.destino.name}</b><br>Iniciando sensores...`);
             } else {
               throw new Error('Destino no encontrado');
             }
@@ -528,12 +511,10 @@
 
         console.log('🌍 Iniciando GPS con alta precisión...');
         
-        // MODIFICADO: Variable para tracking de primera posición
         let isFirstPosition = true;
         
         this.watchId = navigator.geolocation.watchPosition(
           (position) => {
-            // NUEVO: Iniciar tracking en primera posición
             if (isFirstPosition) {
               const smoothed = this.gpsFilter.getSmoothedPosition();
               if (smoothed) {
@@ -597,7 +578,6 @@
         const userLat = smoothed ? smoothed.lat : filtered.lat;
         const userLon = smoothed ? smoothed.lon : filtered.lon;
         
-        // NUEVO: Actualizar distancia recorrida
         this.updateNavigationDistance(userLat, userLon);
         
         this.actualizarCalidadGPS(accuracy);
@@ -609,7 +589,10 @@
           this.actualizarInterfaz(this.currentDistance, this.targetBearing, accuracy);
           this.actualizarFlecha();
           
-          if (this.currentDistance < 10) {
+          // Radio de llegada dinámico
+          const arrivalRadius = Math.max(15, accuracy * 1.5);
+          
+          if (this.currentDistance <= arrivalRadius) {
             this.llegadaDestino();
           }
         }
@@ -676,10 +659,24 @@
           distanciaTexto = `${(distancia/1000).toFixed(1)} km`;
         }
 
+        // Determinar cercanía con radio dinámico
+        const arrivalRadius = Math.max(15, accuracy * 1.5);
+        let statusIcon = '📍';
+        let statusText = '';
+        
+        if (distancia <= arrivalRadius * 2 && distancia > arrivalRadius) {
+          statusIcon = '🎯';
+          statusText = '<br><span style="color: orange; font-weight: bold;">¡Muy cerca! Sigue avanzando</span>';
+        } else if (distancia <= arrivalRadius) {
+          statusIcon = '✅';
+          statusText = '<br><span style="color: #4CAF50; font-weight: bold;">¡Llegaste!</span>';
+        }
+
         this.actualizarEstado(`
-          <b>${this.destino.name}</b><br>
-          📏 ${distanciaTexto} · 🧭 ${Math.round(rumbo)}°<br>
+          ${statusIcon} <b>${this.destino.name}</b><br>
+          ${distanciaTexto} · ${Math.round(rumbo)}°<br>
           <small>Precisión GPS: ±${Math.round(accuracy)}m</small>
+          ${statusText}
         `);
         
         if (this.debugDiv) {
@@ -689,7 +686,7 @@
             Destino: ${this.destino.lat.toFixed(7)}, ${this.destino.lon.toFixed(7)}<br>
             Distancia: ${Math.round(distancia)}m | Rumbo: ${Math.round(rumbo)}°<br>
             Heading: ${Math.round(this.currentHeading)}° | Muestras GPS: ${this.gpsFilter.positions.length}<br>
-            Recorrido: ${Math.round(this.totalDistanceTraveled)}m
+            Recorrido: ${Math.round(this.totalDistanceTraveled)}m | Radio llegada: ${Math.round(arrivalRadius)}m
           `;
         }
       }
@@ -730,7 +727,7 @@
       }
 
       calibrarBrujula() {
-        this.actualizarEstado('🔧 Gira el dispositivo en forma de 8 para calibrar');
+        this.actualizarEstado('Gira el dispositivo en forma de 8 para calibrar');
         setTimeout(() => {
           this.actualizarEstado('Brújula calibrada. Apunta la flecha verde hacia el destino.');
         }, 3000);
@@ -752,16 +749,14 @@
         }
       }
 
-      // MODIFICADO: Registrar navegación completada
       async llegadaDestino() {
         this.actualizarEstado(`
           <div style="color: #4CAF50; font-weight: bold;">
-            🎉 ¡HAS LLEGADO!<br>
+            ¡HAS LLEGADO!<br>
             ${this.destino.name}
           </div>
         `);
         
-        // NUEVO: Registrar navegación completada
         await this.completeNavigationTracking(true);
         
         if (this.watchId) {
@@ -804,9 +799,7 @@
         this.actualizarEstado(`<div style="color: #ff4444;">${mensaje}</div>`);
       }
 
-      // MODIFICADO: Registrar navegación incompleta si se cierra
       async cleanup() {
-        // NUEVO: Registrar como incompleta si está activa
         if (this.navigationActive) {
           await this.completeNavigationTracking(false);
         }
