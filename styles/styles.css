@@ -636,3 +636,30 @@ body.session-active > header {
     min-width: 100%;
   }
 }
+
+/* Botón de Admin flotante en pantalla de selección */
+.admin-btn-floating {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  background: rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.admin-btn-floating:hover {
+  background: white;
+  color: #764ba2;
+}
+
+/* Ajuste responsive para botón flotante */
+@media (max-width: 768px) {
+  .admin-btn-floating {
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
