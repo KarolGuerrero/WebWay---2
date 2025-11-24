@@ -7,7 +7,7 @@ const client = new Client({
   port: 5432,
   database: 'Webway',
   user: 'postgres',
-  password: 'Postgres' // CAMBIA ESTO
+  password: 'ALPXZVMspovGYMKjbXAeskPFPzVBeXKW' // CAMBIA ESTO
 });
 
 // Tus POIs
