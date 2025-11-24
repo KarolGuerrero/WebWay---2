@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebWay - Demo Campus</title>
   <link rel="stylesheet" href="styles/styles.css">
+  
 </head>
 <body>
   <!-- Pantalla de selección de tipo de usuario -->
   <div id="userSelectionScreen" class="user-selection-screen">
     <div class="selection-container">
       <div class="selection-logo">
-        <h1>WebWay AR</h1>
+        <h1>🎯 WebWay AR</h1>
         <p>Universidad Sergio Arboleda</p>
       </div>
 
@@ -34,14 +35,23 @@
     </div>
   </div>
 
-  <!-- Contenido principal (tu diseño original) -->
+  <!-- Contenido principal -->
   <header>
-    <h1>WebWay - Navegación Campus</h1>
-    <p>Selecciona tu destino para comenzar</p>
+    <div class="header-content">
+      <h1>🧭 WebWay - Navegación Campus</h1>
+      <p>Selecciona tu destino para comenzar tu recorrido AR</p>
+    </div>
+    <a href="admin/dashboard.html" class="admin-btn">
+      <span>🔐</span>
+      <span>Admin</span>
+    </a>
   </header>
 
   <main>
     <section class="selection-panel">
+      <h2>📍 Selecciona tu Destino</h2>
+      <p>Elige el lugar al que deseas navegar en el campus</p>
+
       <label for="destino">Destino:</label>
       <select id="destino">
         <option value="">-- Selecciona un lugar --</option>
@@ -52,13 +62,17 @@
       </div>
 
       <div class="button-group">
-        <button id="btnAR" class="btn btn-primary">Modo AR con Orientación</button>
+        <button id="btnAR" class="btn btn-primary">
+          <span>🎯</span>
+          <span>Iniciar Navegación AR</span>
+        </button>
       </div>
     </section>
   </main>
 
   <footer>
-    <p>Demo de orientación con Giroscopio y GPS</p>
+    <p>WebWay AR - Universidad Sergio Arboleda © 2024</p>
+    <p style="margin-top: 10px; font-size: 12px;">Sistema de navegación con Giroscopio y GPS</p>
   </footer>
 
   <!-- Scripts -->
@@ -289,9 +303,4 @@
     });
   </script>
 </body>
-<footer>
-  <p>Demo de orientación con Giroscopio y GPS</p>
-  <!-- Botón discreto de admin -->
-  <a href="admin/dashboard.html" style="color: #666; font-size: 11px; text-decoration: none;">Admin</a>
-</footer>
 </html>
