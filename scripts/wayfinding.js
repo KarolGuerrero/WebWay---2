@@ -4,35 +4,35 @@ import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener,
 
 
 // --- GEODESY helpers
-const toRad = d => d * Math.PI/180;
-const toDeg = r => r * 180/Math.PI;
-function normalizeAngle(a){ return ((a%360)+360)%360; }
-function angleDiffSigned(a,b){ let d = normalizeAngle(a)-normalizeAngle(b); if (d>180) d-=360; if (d<-180) d+=360; return d; }
+const toRad = d => d * Math.PI / 180;
+const toDeg = r => r * 180 / Math.PI;
+function normalizeAngle(a) { return ((a % 360) + 360) % 360; }
+function angleDiffSigned(a, b) { let d = normalizeAngle(a) - normalizeAngle(b); if (d > 180) d -= 360; if (d < -180) d += 360; return d; }
 
-function distanceMeters(lat1, lon1, lat2, lon2){
+function distanceMeters(lat1, lon1, lat2, lon2) {
   const R = 6371000;
   const φ1 = toRad(lat1), φ2 = toRad(lat2);
-  const Δφ = toRad(lat2-lat1), Δλ = toRad(lon2-lon1);
-  const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
-  const c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const Δφ = toRad(lat2 - lat1), Δλ = toRad(lon2 - lon1);
+  const a = Math.sin(Δφ / 2) ** 2 + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-function bearingDegrees(lat1, lon1, lat2, lon2){
+function bearingDegrees(lat1, lon1, lat2, lon2) {
   const φ1 = toRad(lat1), φ2 = toRad(lat2);
   const λ1 = toRad(lon1), λ2 = toRad(lon2);
-  const y = Math.sin(λ2-λ1)*Math.cos(φ2);
-  const x = Math.cos(φ1)*Math.sin(φ2) - Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1);
-  return normalizeAngle(toDeg(Math.atan2(y,x)));
+  const y = Math.sin(λ2 - λ1) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(λ2 - λ1);
+  return normalizeAngle(toDeg(Math.atan2(y, x)));
 }
-function destPoint(lat, lon, bearingDeg, distanceMeters){
+function destPoint(lat, lon, bearingDeg, distanceMeters) {
   const R = 6371000;
   const δ = distanceMeters / R;
   const θ = toRad(bearingDeg);
   const φ1 = toRad(lat);
   const λ1 = toRad(lon);
-  const φ2 = Math.asin(Math.sin(φ1)*Math.cos(δ) + Math.cos(φ1)*Math.sin(δ)*Math.cos(θ));
-  const λ2 = λ1 + Math.atan2(Math.sin(θ)*Math.sin(δ)*Math.cos(φ1), Math.cos(δ)-Math.sin(φ1)*Math.sin(φ2));
-  return { lat: toDeg(φ2), lon: (toDeg(λ2)+540)%360 - 180 };
+  const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
+  const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+  return { lat: toDeg(φ2), lon: (toDeg(λ2) + 540) % 360 - 180 };
 }
 
 // --- State
@@ -55,8 +55,8 @@ const stopBtn = () => document.getElementById('stopBtn');
 function readParams() {
   const p = new URLSearchParams(window.location.search);
   const dest = p.has('dest') ? parseInt(p.get('dest')) : null;
-  const origin = p.has('origin') ? (()=>{
-    const raw = p.get('origin').split(',').map(s=>s.trim());
+  const origin = p.has('origin') ? (() => {
+    const raw = p.get('origin').split(',').map(s => s.trim());
     const lat = parseFloat(raw[0]), lon = parseFloat(raw[1]);
     if (!isNaN(lat) && !isNaN(lon)) return { lat, lon };
     return null;
@@ -65,10 +65,10 @@ function readParams() {
 }
 
 // init
-(async function init(){
+(async function init() {
   try {
     pois = await populateUiAndReturnPoisForAR(); // loads pois & updates UI name if dest param present
-  } catch(e) {
+  } catch (e) {
     console.error('No se pudieron cargar POIs', e);
     infoDiv().textContent = 'Error cargando POIs.';
     return;
@@ -83,7 +83,7 @@ function readParams() {
   }
 
   // Wire buttons
-  calibrateBtn().addEventListener('click', async ()=> {
+  calibrateBtn().addEventListener('click', async () => {
     const ok = await requestOrientationPermissionIfNeeded();
     if (!ok) alert('No se concedió permiso de orientación.');
     installDeviceOrientationListener();
@@ -99,13 +99,13 @@ function readParams() {
     if (currentDestination) {
       document.getElementById('uiDestName').textContent = currentDestination.name;
       // try to auto-start: if origin provided, check distance else prompt
-      setTimeout(()=> handleAutoStartIfRequested(), 300);
+      setTimeout(() => handleAutoStartIfRequested(), 300);
     }
   }
 })();
 
 // --- Auto-start logic
-async function handleAutoStartIfRequested(){
+async function handleAutoStartIfRequested() {
   if (!currentDestination) return;
   if (ENTRY_ORIGIN.lat === null) {
     // no origin param, just prompt user to calibrate and start
@@ -118,7 +118,7 @@ async function handleAutoStartIfRequested(){
     return;
   }
   try {
-    const pos = await new Promise((res,rej)=> navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy:true, timeout:7000 }));
+    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 7000 }));
     const d = distanceMeters(pos.coords.latitude, pos.coords.longitude, ENTRY_ORIGIN.lat, ENTRY_ORIGIN.lon);
     if (d <= ORIGIN_ACCEPT_RADIUS_M) {
       startGuidance();
@@ -130,7 +130,7 @@ async function handleAutoStartIfRequested(){
         if (confirm('¿Iniciar guía de todas formas (demo)?')) startGuidance();
       }
     }
-  } catch(e) {
+  } catch (e) {
     console.warn('No se pudo leer posición para autostart:', e);
     if (confirm('No se pudo obtener ubicación. Iniciar demo de todas formas?')) startGuidance();
   }
@@ -158,13 +158,12 @@ function ensureAtOriginThenStart() {
     }
   }, err => {
     alert('No se pudo obtener ubicación: ' + (err.message || err));
-  }, { enableHighAccuracy:true, timeout:7000 });
+  }, { enableHighAccuracy: true, timeout: 7000 });
 }
 
 // --- Start / Stop guidance
 function startGuidance() {
   if (!currentDestination) {
-    // if dest not set via param, try to read from UI name
     const name = document.getElementById('uiDestName').textContent;
     currentDestination = pois.find(p => p.name === name);
   }
@@ -173,25 +172,49 @@ function startGuidance() {
   infoDiv().textContent = `Destino: ${currentDestination.name}`;
 
   if (watchId) navigator.geolocation.clearWatch(watchId);
+
+  // NUEVO: Flags de control
+  let isFirstPosition = true;
+  let navigationRegistered = false;
+
   watchId = navigator.geolocation.watchPosition(pos => {
     const userLat = pos.coords.latitude, userLon = pos.coords.longitude;
+
+    // Guardar precisión GPS
+    lastPosition = {
+      lat: userLat,
+      lon: userLon,
+      accuracy: pos.coords.accuracy
+    };
+
+    // NUEVO: Solo iniciar tracking UNA VEZ con la primera posición
+    if (isFirstPosition && !navigationRegistered) {
+      startNavigationTracking(userLat, userLon);
+      navigationRegistered = true;
+      isFirstPosition = false;
+      console.log('📍 Navegación iniciada y registrada en backend');
+    } else if (!isFirstPosition) {
+      // Solo actualizar distancia después de haber iniciado el tracking
+      updateNavigationDistance(userLat, userLon);
+    }
+
     updateGuidance(userLat, userLon);
   }, err => {
     console.error('geo error', err);
     infoDiv().textContent = 'Error de geolocalización: ' + (err.message || err);
-  }, { enableHighAccuracy:true, maximumAge:1000, timeout:7000 });
+  }, { enableHighAccuracy: true, maximumAge: 1000, timeout: 7000 });
 
   startBtn().style.display = 'none';
   stopBtn().style.display = 'inline-block';
-  arrowEl().setAttribute('visible','true');
+  arrowEl().setAttribute('visible', 'true');
 }
 
-function stopGuidance(){
+function stopGuidance() {
   if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   infoDiv().textContent = 'Guía detenida.';
   startBtn().style.display = 'inline-block';
   stopBtn().style.display = 'none';
-  arrowEl().setAttribute('visible','false');
+  arrowEl().setAttribute('visible', 'false');
 }
 
 // --- updateGuidance: compute dist, bearing, arrow placement + rotation based on device heading

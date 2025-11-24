@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link rel="stylesheet" href="styles/styles.css">
   <link rel="stylesheet" href="styles/app.css">
 </head>
+
 <body>
   <!-- Pantalla de selección de tipo de usuario -->
   <div id="userSelectionScreen" class="user-selection-screen">
@@ -14,10 +16,11 @@
     <a href="admin/dashboard.html" class="admin-btn-floating">
       Admin
     </a>
-    
+
     <div class="selection-container">
       <div class="selection-logo">
-        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="logo-usa">
+        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
+          alt="Universidad Sergio Arboleda" class="logo-usa">
         <h1>WebWay AR</h1>
         <p>Sistema de Navegación Inteligente</p>
       </div>
@@ -50,7 +53,8 @@
   <div class="main-content">
     <header>
       <div class="header-content">
-        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="header-logo">
+        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
+          alt="Universidad Sergio Arboleda" class="header-logo">
         <div class="header-text">
           <h1>WebWay</h1>
           <p>Navegación Campus AR</p>
@@ -96,7 +100,7 @@
 
       <section class="info-cards">
         <div class="info-card">
-          <div class="info-icon-text">  🗺️</div>
+          <div class="info-icon-text"> 🗺️</div>
           <h3>Navegación Precisa</h3>
           <p>Usa GPS y giroscopio para guiarte en tiempo real</p>
         </div>
@@ -195,7 +199,7 @@
 
       if (success) {
         buttonElement.classList.add('selected');
-        
+
         setTimeout(() => {
           showMainContent();
           initApp();
@@ -262,16 +266,21 @@
         const textoEl = document.getElementById('descripcion-texto');
 
         if (!destinoId) {
-          contenedor.classList.remove('active');
+          contenedor.style.display = 'none';
           return;
         }
 
         const destino = this.lugares.find(l => l.id == destinoId);
         if (destino && destino.description) {
           textoEl.textContent = destino.description;
-          contenedor.classList.add('active');
+          contenedor.style.display = 'block';
+
+          // NUEVO: Registrar búsqueda (NO navegación)
+          if (window.arAPI && window.arAPI.hasActiveSession()) {
+            window.arAPI.registerSearch(parseInt(destinoId));
+          }
         } else {
-          contenedor.classList.remove('active');
+          contenedor.style.display = 'none';
         }
       }
 
@@ -331,4 +340,5 @@
     });
   </script>
 </body>
+
 </html>

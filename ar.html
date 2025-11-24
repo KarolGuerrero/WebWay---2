@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AR Wayfinding - WebWay</title>
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  
+
   <style>
     body {
       margin: 0;
@@ -15,7 +16,7 @@
       background: #000;
       font-family: Arial, sans-serif;
     }
-    
+
     #camera-container {
       position: fixed;
       top: 0;
@@ -24,13 +25,13 @@
       height: 100vh;
       z-index: 1;
     }
-    
+
     #camera-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
     #threejs-container {
       position: fixed;
       top: 0;
@@ -40,11 +41,11 @@
       z-index: 2;
       pointer-events: none;
     }
-    
+
     canvas {
       display: block;
     }
-    
+
     .info-panel {
       position: fixed;
       bottom: 20px;
@@ -60,7 +61,7 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
+
     .btn {
       padding: 12px 24px;
       background: #4CAF50;
@@ -72,18 +73,18 @@
       font-size: 16px;
       pointer-events: auto;
     }
-    
+
     .btn-secondary {
       background: #666;
     }
-    
+
     .debug-info {
       font-size: 12px;
       color: #ccc;
       margin-top: 10px;
       line-height: 1.4;
     }
-    
+
     .loading {
       position: fixed;
       top: 0;
@@ -98,7 +99,7 @@
       align-items: center;
       z-index: 1000;
     }
-    
+
     .spinner {
       width: 50px;
       height: 50px;
@@ -108,12 +109,17 @@
       animation: spin 1s linear infinite;
       margin-bottom: 20px;
     }
-    
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
-    
+
     .compass-overlay {
       position: fixed;
       top: 20px;
@@ -130,7 +136,7 @@
       z-index: 3;
       font-weight: bold;
     }
-    
+
     .gps-quality {
       position: fixed;
       top: 20px;
@@ -142,13 +148,25 @@
       z-index: 3;
       font-size: 12px;
     }
-    
-    .quality-excellent { color: #4CAF50; }
-    .quality-good { color: #8BC34A; }
-    .quality-fair { color: #FF9800; }
-    .quality-poor { color: #F44336; }
+
+    .quality-excellent {
+      color: #4CAF50;
+    }
+
+    .quality-good {
+      color: #8BC34A;
+    }
+
+    .quality-fair {
+      color: #FF9800;
+    }
+
+    .quality-poor {
+      color: #F44336;
+    }
   </style>
 </head>
+
 <body>
   <div id="camera-container">
     <video id="camera-video" autoplay playsinline></video>
@@ -224,7 +242,7 @@
 
       addPosition(lat, lon, accuracy) {
         const normalizedError = Math.min(accuracy / 10, 10);
-        
+
         const filteredLat = this.latFilter.filter(lat, normalizedError);
         const filteredLon = this.lonFilter.filter(lon, normalizedError);
 
@@ -263,50 +281,50 @@
         this.camera = null;
         this.renderer = null;
         this.arrow = null;
-        
+
         this.destino = null;
         this.userPosition = null;
         this.watchId = null;
-        
+
         this.gpsFilter = new GPSPositionFilter();
-        
+
         this.currentHeading = 0;
         this.targetBearing = 0;
         this.currentDistance = 0;
-        
+
         this.infoDiv = null;
         this.debugDiv = null;
         this.statusText = null;
         this.compassDirection = null;
         this.gpsQualityText = null;
-        
+
         // Tracking de navegación
         this.navigationStartTime = null;
         this.navigationStartPosition = null;
         this.totalDistanceTraveled = 0;
         this.lastPosition = null;
         this.navigationActive = false;
-        
+
         this.init();
       }
 
       async init() {
         try {
           console.log('Iniciando Navegación por Orientación...');
-          
+
           await this.cargarDestino();
           this.configurarElementosDOM();
-          
+
           this.inicializarThreeJS();
-          
+
           await this.iniciarCamara();
           this.iniciarGPS();
           await this.iniciarOrientacion();
-          
+
           this.animate();
-          
+
           document.getElementById('loading').style.display = 'none';
-          
+
         } catch (error) {
           console.error('Error:', error);
           this.mostrarError('Error: ' + error.message);
@@ -314,25 +332,25 @@
       }
 
       // MÉTODOS DE TRACKING
-      
+
       startNavigationTracking(userLat, userLon) {
         this.navigationStartTime = Date.now();
         this.navigationStartPosition = { lat: userLat, lon: userLon };
         this.lastPosition = { lat: userLat, lon: userLon };
         this.totalDistanceTraveled = 0;
         this.navigationActive = true;
-        console.log('📍 Tracking iniciado:', { 
-          poi: this.destino.name, 
-          start: this.navigationStartPosition 
+        console.log('📍 Tracking iniciado:', {
+          poi: this.destino.name,
+          start: this.navigationStartPosition
         });
       }
 
       updateNavigationDistance(userLat, userLon) {
         if (this.lastPosition && this.navigationActive) {
           const segmentDist = this.calcularDistancia(
-            this.lastPosition.lat, 
-            this.lastPosition.lon, 
-            userLat, 
+            this.lastPosition.lat,
+            this.lastPosition.lon,
+            userLat,
             userLon
           );
           if (segmentDist < 50) {
@@ -378,7 +396,7 @@
           const pois = await populateUiAndReturnPoisForAR();
           const urlParams = new URLSearchParams(window.location.search);
           const destId = urlParams.has('dest') ? parseInt(urlParams.get('dest')) : null;
-          
+
           if (destId !== null) {
             this.destino = pois.find(p => p.id === destId);
             if (this.destino) {
@@ -401,7 +419,7 @@
         this.statusText = document.getElementById('status-text');
         this.compassDirection = document.getElementById('compass-direction');
         this.gpsQualityText = document.getElementById('gps-quality-text');
-        
+
         document.getElementById('calibrate-btn').addEventListener('click', () => {
           this.calibrarBrujula();
         });
@@ -414,8 +432,8 @@
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
         this.camera.position.set(0, 0, 5);
 
-        this.renderer = new THREE.WebGLRenderer({ 
-          alpha: true, 
+        this.renderer = new THREE.WebGLRenderer({
+          alpha: true,
           antialias: true,
           powerPreference: "high-performance"
         });
@@ -425,12 +443,12 @@
         this.renderer.domElement.style.top = '0';
         this.renderer.domElement.style.left = '0';
         this.renderer.domElement.style.zIndex = '2';
-        
+
         document.getElementById('threejs-container').appendChild(this.renderer.domElement);
 
         this.crearFlecha3D();
         this.configurarLuces();
-        
+
         window.addEventListener('resize', this.onWindowResize.bind(this));
       }
 
@@ -438,7 +456,7 @@
         const arrowGroup = new THREE.Group();
 
         const coneGeometry = new THREE.ConeGeometry(0.2, 0.8, 8);
-        const coneMaterial = new THREE.MeshPhongMaterial({ 
+        const coneMaterial = new THREE.MeshPhongMaterial({
           color: 0x4CAF50,
           transparent: true,
           opacity: 0.9
@@ -447,8 +465,8 @@
         cone.position.y = 0.4;
 
         const cylinderGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.4, 8);
-        const cylinderMaterial = new THREE.MeshPhongMaterial({ 
-          color: 0x3366FF 
+        const cylinderMaterial = new THREE.MeshPhongMaterial({
+          color: 0x3366FF
         });
         const cylinder = new THREE.Mesh(cylinderGeometry, cylinderMaterial);
         cylinder.position.y = -0.2;
@@ -476,7 +494,7 @@
 
       async iniciarCamara() {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ 
+          const stream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: 'environment',
               width: { ideal: 1280 },
@@ -484,19 +502,19 @@
             },
             audio: false
           });
-          
+
           const video = document.getElementById('camera-video');
           video.srcObject = stream;
-          
+
           await new Promise((resolve) => {
             video.onloadedmetadata = () => {
               video.play();
               resolve();
             };
           });
-          
+
           console.log('✅ Cámara iniciada correctamente');
-          
+
         } catch (error) {
           console.error('❌ Error de cámara:', error);
           throw new Error('No se pudo acceder a la cámara: ' + error.message);
@@ -510,19 +528,23 @@
         }
 
         console.log('🌍 Iniciando GPS con alta precisión...');
-        
+
         let isFirstPosition = true;
-        
+        let navigationRegistered = false; // NUEVO: Flag para evitar duplicados
+
         this.watchId = navigator.geolocation.watchPosition(
           (position) => {
-            if (isFirstPosition) {
+            // NUEVO: Solo registrar navegación UNA VEZ al obtener primera posición válida
+            if (isFirstPosition && !navigationRegistered) {
               const smoothed = this.gpsFilter.getSmoothedPosition();
               if (smoothed) {
                 this.startNavigationTracking(smoothed.lat, smoothed.lon);
+                navigationRegistered = true;
                 isFirstPosition = false;
+                console.log('📍 Navegación iniciada y registrada en backend');
               }
             }
-            
+
             this.actualizarPosicionUsuario(position);
           },
           (error) => this.manejarErrorGPS(error),
@@ -540,10 +562,10 @@
           this.mostrarError('Se necesitan permisos de orientación para la brújula');
           return;
         }
-        
+
         installDeviceOrientationListener();
         console.log('🧭 Sensores de orientación iniciados');
-        
+
         setInterval(() => {
           this.actualizarOrientacion();
         }, 100);
@@ -560,7 +582,7 @@
 
       actualizarDireccionCompas() {
         if (!this.compassDirection) return;
-        
+
         const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
         const index = Math.round(this.currentHeading / 45) % 8;
         this.compassDirection.textContent = directions[index];
@@ -571,41 +593,41 @@
         const rawLat = position.coords.latitude;
         const rawLon = position.coords.longitude;
         const accuracy = position.coords.accuracy;
-        
+
         const filtered = this.gpsFilter.addPosition(rawLat, rawLon, accuracy);
         const smoothed = this.gpsFilter.getSmoothedPosition();
-        
+
         const userLat = smoothed ? smoothed.lat : filtered.lat;
         const userLon = smoothed ? smoothed.lon : filtered.lon;
-        
+
         this.updateNavigationDistance(userLat, userLon);
-        
+
         this.actualizarCalidadGPS(accuracy);
-        
+
         if (this.destino) {
           this.currentDistance = this.calcularDistancia(userLat, userLon, this.destino.lat, this.destino.lon);
           this.targetBearing = this.calcularRumbo(userLat, userLon, this.destino.lat, this.destino.lon);
-          
+
           this.actualizarInterfaz(this.currentDistance, this.targetBearing, accuracy);
           this.actualizarFlecha();
-          
+
           // Radio de llegada dinámico
           const arrivalRadius = Math.max(15, accuracy * 1.5);
-          
+
           if (this.currentDistance <= arrivalRadius) {
             this.llegadaDestino();
           }
         }
-        
+
         console.log(`📍 GPS - Raw: ${rawLat.toFixed(7)}, ${rawLon.toFixed(7)} | Filtered: ${userLat.toFixed(7)}, ${userLon.toFixed(7)} | Accuracy: ${accuracy.toFixed(1)}m`);
       }
 
       actualizarCalidadGPS(accuracy) {
         if (!this.gpsQualityText) return;
-        
+
         let qualityText = '';
         let qualityClass = '';
-        
+
         if (accuracy < 5) {
           qualityText = 'Excelente';
           qualityClass = 'quality-excellent';
@@ -619,7 +641,7 @@
           qualityText = 'Bajo';
           qualityClass = 'quality-poor';
         }
-        
+
         this.gpsQualityText.innerHTML = `GPS: <span class="${qualityClass}">${qualityText}</span> (±${accuracy.toFixed(1)}m)`;
       }
 
@@ -630,10 +652,10 @@
         const Δφ = (lat2 - lat1) * Math.PI / 180;
         const Δλ = (lon2 - lon1) * Math.PI / 180;
 
-        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                 Math.cos(φ1) * Math.cos(φ2) *
-                 Math.sin(Δλ/2) * Math.sin(Δλ/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+          Math.cos(φ1) * Math.cos(φ2) *
+          Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return R * c;
       }
@@ -645,7 +667,7 @@
 
         const y = Math.sin(Δλ) * Math.cos(φ2);
         const x = Math.cos(φ1) * Math.sin(φ2) -
-                 Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+          Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
         const θ = Math.atan2(y, x);
 
         return (θ * 180 / Math.PI + 360) % 360;
@@ -656,14 +678,14 @@
         if (distancia < 1000) {
           distanciaTexto = `${Math.round(distancia)} m`;
         } else {
-          distanciaTexto = `${(distancia/1000).toFixed(1)} km`;
+          distanciaTexto = `${(distancia / 1000).toFixed(1)} km`;
         }
 
         // Determinar cercanía con radio dinámico
         const arrivalRadius = Math.max(15, accuracy * 1.5);
         let statusIcon = '📍';
         let statusText = '';
-        
+
         if (distancia <= arrivalRadius * 2 && distancia > arrivalRadius) {
           statusIcon = '🎯';
           statusText = '<br><span style="color: orange; font-weight: bold;">¡Muy cerca! Sigue avanzando</span>';
@@ -678,7 +700,7 @@
           <small>Precisión GPS: ±${Math.round(accuracy)}m</small>
           ${statusText}
         `);
-        
+
         if (this.debugDiv) {
           const smoothed = this.gpsFilter.getSmoothedPosition();
           this.debugDiv.innerHTML = `
@@ -697,22 +719,22 @@
         }
 
         let relativeBearing = this.targetBearing - this.currentHeading;
-        
+
         if (relativeBearing > 180) relativeBearing -= 360;
         if (relativeBearing < -180) relativeBearing += 360;
-        
+
         const rotationY = THREE.MathUtils.degToRad(relativeBearing);
         this.arrow.rotation.y = rotationY;
-        
+
         this.actualizarColorFlecha(Math.abs(relativeBearing));
       }
 
       actualizarColorFlecha(angleDiff) {
         if (!this.arrow) return;
-        
+
         const cone = this.arrow.children[0];
         const cylinder = this.arrow.children[1];
-        
+
         let color;
         if (angleDiff < 15) {
           color = 0x4CAF50;
@@ -721,7 +743,7 @@
         } else {
           color = 0xF44336;
         }
-        
+
         cone.material.color.setHex(color);
         cylinder.material.color.setHex(color);
       }
@@ -735,7 +757,7 @@
 
       animate() {
         requestAnimationFrame(this.animate.bind(this));
-        
+
         if (this.renderer && this.scene && this.camera) {
           this.renderer.render(this.scene, this.camera);
         }
@@ -756,14 +778,14 @@
             ${this.destino.name}
           </div>
         `);
-        
+
         await this.completeNavigationTracking(true);
-        
+
         if (this.watchId) {
           navigator.geolocation.clearWatch(this.watchId);
           this.watchId = null;
         }
-        
+
         if (navigator.vibrate) {
           navigator.vibrate([300, 100, 300, 100, 300]);
         }
@@ -777,7 +799,7 @@
 
       manejarErrorGPS(error) {
         let mensaje = 'Error GPS: ';
-        switch(error.code) {
+        switch (error.code) {
           case error.PERMISSION_DENIED:
             mensaje = 'Permiso de ubicación denegado. Activa la ubicación.';
             break;
@@ -803,7 +825,7 @@
         if (this.navigationActive) {
           await this.completeNavigationTracking(false);
         }
-        
+
         if (this.watchId) {
           navigator.geolocation.clearWatch(this.watchId);
         }
@@ -828,4 +850,5 @@
     });
   </script>
 </body>
-</html> 
+
+</html>
