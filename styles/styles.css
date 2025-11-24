@@ -497,7 +497,7 @@ main {
 }
 
 .icon-text {
-  font-size: 20px;
+  font-size: 28px;  /* Era 20px */
   font-weight: 800;
   color: var(--color-primary);
   letter-spacing: 1px;
@@ -723,7 +723,7 @@ select:focus {
 }
 
 .info-icon-text {
-  font-size: 33 px;
+  font-size: 48px;  /* Era 33px */
   font-weight: 800;
   color: var(--color-secondary);
   margin-bottom: 22px;
