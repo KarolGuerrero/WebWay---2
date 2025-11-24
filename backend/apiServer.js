@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
@@ -6,22 +5,30 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Configuración de PostgreSQL
+// Configuración de PostgreSQL usando variable de entorno de Railway
 const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'Webway',
-  user: 'postgres',
-  password: 'Postgres' // CAMBIA ESTO
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
-// Secret para JWT (en producción usar variable de entorno)
-const JWT_SECRET = 'c4f91e9c1b8d4f6fa2d7e3ab94c0f7d1e8b3a6df4c9e72b1a5d0c3f8b7e4a29c';
+// Secret para JWT (usa variable de entorno de Railway)
+const JWT_SECRET = process.env.JWT_SECRET || 'c4f91e9c1b8d4f6fa2d7e3ab94c0f7d1e8b3a6df4c9e72b1a5d0c3f8b7e4a29c';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://web-way-2.vercel.app',
+    'https://webway-2.vercel.app',
+    'http://localhost',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // Middleware para obtener IP del cliente
@@ -55,6 +62,7 @@ const authenticateAdmin = async (req, res, next) => {
     return res.status(401).json({ success: false, message: 'Token inválido' });
   }
 };
+
 
 // ═══════════════════════════════════════════════════════════
 // ENDPOINTS PÚBLICOS (para la app de AR)
