@@ -58,9 +58,9 @@ class ARAnalyticsAPI {
         this.sessionStartTime = new Date();
 
         // Guardar en localStorage por si se recarga la página
-        localStorage.setItem('ar_session_id', this.sessionId);
-        localStorage.setItem('ar_user_type_id', this.userTypeId);
-        localStorage.setItem('ar_session_start', this.sessionStartTime.toISOString());
+        sessionStorage.setItem('ar_session_id', this.sessionId);
+        sessionStorage.setItem('ar_user_type_id', this.userTypeId);
+        sessionStorage.setItem('ar_session_start', this.sessionStartTime.toISOString());
 
         console.log('✅ Sesión iniciada:', this.sessionId);
         return true;
@@ -87,9 +87,9 @@ class ARAnalyticsAPI {
       });
 
       // Limpiar datos locales
-      localStorage.removeItem('ar_session_id');
-      localStorage.removeItem('ar_user_type_id');
-      localStorage.removeItem('ar_session_start');
+        sessionStorage.removeItem('ar_session_id');
+        sessionStorage.removeItem('ar_user_type_id');
+        sessionStorage.removeItem('ar_session_start');
 
       this.sessionId = null;
       this.userTypeId = null;
@@ -105,9 +105,9 @@ class ARAnalyticsAPI {
    * Recuperar sesión desde localStorage (si existe)
    */
   restoreSession() {
-    const sessionId = localStorage.getItem('ar_session_id');
-    const userTypeId = localStorage.getItem('ar_user_type_id');
-    const sessionStart = localStorage.getItem('ar_session_start');
+    const sessionId = sessionStorage.getItem('ar_session_id');
+    const userTypeId = sessionStorage.getItem('ar_user_type_id');
+    const sessionStart = sessionStorage.getItem('ar_session_start');
 
     if (sessionId && userTypeId) {
       this.sessionId = parseInt(sessionId);
