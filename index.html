@@ -11,17 +11,20 @@
   <!-- Pantalla de selección de tipo de usuario -->
   <div id="userSelectionScreen" class="user-selection-screen">
     <!-- Botón de Admin en la esquina superior derecha -->
-    <a href="admin/dashboard.html" class="admin-btn admin-btn-floating">Admin</a>
+    <a href="admin/dashboard.html" class="admin-btn-floating">
+      <span>🔐</span> Admin
+    </a>
     
     <div class="selection-container">
       <div class="selection-logo">
+        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="logo-usa">
         <h1>WebWay AR</h1>
-        <p>Universidad Sergio Arboleda</p>
+        <p>Sistema de Navegación Inteligente</p>
       </div>
 
       <div class="selection-title">
         <h2>¿Quién eres?</h2>
-        <p>Selecciona tu tipo para comenzar</p>
+        <p>Selecciona tu perfil para comenzar tu experiencia</p>
       </div>
 
       <div class="user-type-buttons" id="userTypeButtons">
@@ -29,47 +32,103 @@
       </div>
 
       <div id="loadingSpinner" class="loading-spinner">
-        <p>Cargando...</p>
+        <div class="spinner"></div>
+        <p>Cargando perfiles...</p>
       </div>
 
       <div id="errorMessage" class="error-message">
-        No se pudo conectar al servidor. Verifica tu conexión.
+        <span>⚠️</span>
+        <div>
+          <strong>Error de conexión</strong>
+          <p>No se pudo conectar al servidor. Verifica tu conexión.</p>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Contenido principal -->
-  <header>
-    <div class="header-content">
-      <h1>WebWay - Navegación Campus</h1>
-    </div>
-    <a href="admin/dashboard.html" class="admin-btn">Admin</a>
-  </header>
-
-  <main>
-    <section class="selection-panel">
-      <h2>Selecciona tu Destino</h2>
-      <p>Elige el lugar al que deseas navegar en el campus</p>
-
-      <label for="destino">Destino:</label>
-      <select id="destino">
-        <option value="">-- Selecciona un lugar --</option>
-      </select>
-
-      <div id="lugar-descripcion" class="lugar-descripcion" style="display: none;">
-        <p id="descripcion-texto"></p>
+  <div class="main-content">
+    <header>
+      <div class="header-content">
+        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png" alt="Universidad Sergio Arboleda" class="header-logo">
+        <div class="header-text">
+          <h1>WebWay</h1>
+          <p>Navegación Campus AR</p>
+        </div>
       </div>
+      <a href="admin/dashboard.html" class="admin-btn">
+        <span>🔐</span> Admin
+      </a>
+    </header>
 
-      <div class="button-group">
-        <button id="btnAR" class="btn btn-primary">Iniciar Navegación AR</button>
+    <main>
+      <section class="selection-panel">
+        <div class="panel-header">
+          <div class="icon-wrapper">
+            <span class="icon">📍</span>
+          </div>
+          <div>
+            <h2>Selecciona tu Destino</h2>
+            <p>Elige el lugar al que deseas navegar en el campus</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="destino">
+            <span class="label-icon">🎯</span>
+            Destino
+          </label>
+          <select id="destino">
+            <option value="">-- Selecciona un lugar --</option>
+          </select>
+        </div>
+
+        <div id="lugar-descripcion" class="lugar-descripcion">
+          <div class="description-icon">ℹ️</div>
+          <p id="descripcion-texto"></p>
+        </div>
+
+        <div class="button-group">
+          <button id="btnAR" class="btn btn-primary">
+            <span class="btn-icon">🚀</span>
+            Iniciar Navegación AR
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="info-cards">
+        <div class="info-card">
+          <div class="info-icon">🗺️</div>
+          <h3>Navegación Precisa</h3>
+          <p>Usa GPS y giroscopio para guiarte en tiempo real</p>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">📱</div>
+          <h3>Realidad Aumentada</h3>
+          <p>Visualiza direcciones superpuestas en tu entorno</p>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">⚡</div>
+          <h3>Rápido y Fácil</h3>
+          <p>Encuentra tu destino sin complicaciones</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>WebWay AR</h4>
+          <p>Universidad Sergio Arboleda</p>
+        </div>
+        <div class="footer-section">
+          <p>&copy; 2025 Todos los derechos reservados</p>
+          <p class="footer-tech">Sistema de navegación con Giroscopio y GPS</p>
+        </div>
       </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>WebWay AR - Universidad Sergio Arboleda &copy; 2025</p>
-    <p style="margin-top: 10px; font-size: 12px;">Sistema de navegación con Giroscopio y GPS</p>
-  </footer>
+    </footer>
+  </div>
 
   <!-- Scripts -->
   <script src="scripts/api.js"></script>
@@ -78,8 +137,10 @@
 
     const userTypeIcons = {
       'visitante': '👤',
-      'estudiante': '📖',
-      'trabajador': '💼'
+      'estudiante': '🎓',
+      'trabajador': '💼',
+      'profesor': '👨‍🏫',
+      'administrativo': '📋'
     };
 
     const selectionScreen = document.getElementById('userSelectionScreen');
@@ -113,7 +174,7 @@
       button.className = 'user-type-btn';
       button.onclick = () => selectUserType(userType.id, button);
 
-      const icon = userTypeIcons[userType.type_name] || '👤';
+      const icon = userTypeIcons[userType.type_name.toLowerCase()] || '👤';
 
       button.innerHTML = `
         <div class="user-type-icon">${icon}</div>
@@ -121,6 +182,7 @@
           <h3>${capitalizeFirst(userType.type_name)}</h3>
           <p>${userType.description}</p>
         </div>
+        <div class="user-type-arrow">→</div>
       `;
 
       return button;
@@ -137,15 +199,12 @@
       const success = await arAPI.startSession(userTypeId);
 
       if (success) {
-        buttonElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-        buttonElement.style.color = 'white';
-        buttonElement.querySelector('.user-type-content h3').style.color = 'white';
-        buttonElement.querySelector('.user-type-content p').style.color = 'white';
-
+        buttonElement.classList.add('selected');
+        
         setTimeout(() => {
           showMainContent();
           initApp();
-        }, 500);
+        }, 600);
       } else {
         loadingSpinner.classList.remove('active');
         errorMessage.classList.add('active');
@@ -208,16 +267,16 @@
         const textoEl = document.getElementById('descripcion-texto');
 
         if (!destinoId) {
-          contenedor.style.display = 'none';
+          contenedor.classList.remove('active');
           return;
         }
 
         const destino = this.lugares.find(l => l.id == destinoId);
         if (destino && destino.description) {
           textoEl.textContent = destino.description;
-          contenedor.style.display = 'block';
+          contenedor.classList.add('active');
         } else {
-          contenedor.style.display = 'none';
+          contenedor.classList.remove('active');
         }
       }
 
@@ -248,17 +307,23 @@
       }
 
       mostrarError(mensaje) {
-        const errorExistente = document.querySelector('.error');
+        const errorExistente = document.querySelector('.error-toast');
         if (errorExistente) errorExistente.remove();
 
         const errorDiv = document.createElement('div');
-        errorDiv.className = 'error';
-        errorDiv.textContent = mensaje;
+        errorDiv.className = 'error-toast';
+        errorDiv.innerHTML = `
+          <span class="error-icon">⚠️</span>
+          <span>${mensaje}</span>
+        `;
 
-        const main = document.querySelector('main');
-        main.insertBefore(errorDiv, main.firstChild);
+        document.body.appendChild(errorDiv);
 
-        setTimeout(() => errorDiv.remove(), 5000);
+        setTimeout(() => errorDiv.classList.add('show'), 10);
+        setTimeout(() => {
+          errorDiv.classList.remove('show');
+          setTimeout(() => errorDiv.remove(), 300);
+        }, 5000);
       }
     }
 
