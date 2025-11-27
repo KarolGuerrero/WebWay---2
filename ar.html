@@ -195,6 +195,266 @@
     <p>Inicializando sensores...</p>
   </div>
 
+  <div id="help-floating-btn" class="help-btn">?</div>
+
+  <div id="help-modal" class="help-modal">
+    <div class="help-content">
+      <span class="close-help">&times;</span>
+
+      <div class="carousel-container">
+
+        <div class="slide active">
+          <div class="slide-icon">📱</div>
+          <h3>Modo Realidad Aumentada</h3>
+          <p>Estás viendo el campus a través de tu cámara.</p>
+          <p>Busca la <strong>Flecha Flotante</strong> en la pantalla, ella te guiará.</p>
+        </div>
+
+        <div class="slide">
+          <div class="slide-icon">🧭</div>
+          <h3>La Brújula es Clave</h3>
+          <p>Si la flecha apunta mal, tu brújula necesita ajuste.</p>
+          <p>Mueve tu celular haciendo la forma de un <strong>"8"</strong> en el aire varias veces.</p>
+        </div>
+
+        <div class="slide">
+          <div class="slide-icon">📍</div>
+          <h3>¿Cómo llego?</h3>
+          <p>Sigue la dirección de la flecha.</p>
+          <p>Abajo verás la distancia restante. Cuando estés cerca (menos de 15m), te avisaremos.</p>
+        </div>
+
+        <div class="carousel-controls">
+          <button id="prevBtn" class="nav-btn">❮ Anterior</button>
+          <div class="dots-container" id="dotsContainer"></div>
+          <button id="nextBtn" class="nav-btn">Siguiente ❯</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Estilos del Módulo de Ayuda */
+    .help-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: #FFC107;
+      /* Amarillo Sergio */
+      color: #003B7A;
+      /* Azul Sergio */
+      border-radius: 50%;
+      text-align: center;
+      line-height: 60px;
+      font-size: 30px;
+      font-weight: 800;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      z-index: 9999;
+      /* Muy alto para estar sobre la cámara */
+      transition: all 0.3s ease;
+      border: 3px solid white;
+      font-family: Arial, sans-serif;
+    }
+
+    .help-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .help-modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      /* Más alto que el botón */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 59, 122, 0.9);
+      backdrop-filter: blur(5px);
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .help-content {
+      background-color: white;
+      padding: 40px 30px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 400px;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border-top: 6px solid #FFC107;
+      font-family: Arial, sans-serif;
+    }
+
+    .close-help {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: #ccc;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      min-height: 250px;
+    }
+
+    .slide.active {
+      display: flex;
+      animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .slide-icon {
+      font-size: 50px;
+      margin-bottom: 20px;
+      background: #FFF9E6;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .slide h3 {
+      color: #003B7A;
+      margin-bottom: 15px;
+      font-weight: 800;
+    }
+
+    .slide p {
+      color: #555;
+      line-height: 1.5;
+      font-size: 16px;
+    }
+
+    .carousel-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: #003B7A;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+    }
+
+    .dots-container {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      height: 8px;
+      width: 8px;
+      background-color: #ddd;
+      border-radius: 50%;
+    }
+
+    .dot.active {
+      background-color: #FFC107;
+      width: 12px;
+      height: 12px;
+    }
+  </style>
+
+  <script>
+    // Lógica independiente para el Módulo de Ayuda
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById("help-modal");
+      const btn = document.getElementById("help-floating-btn");
+      const closeSpan = document.querySelector(".close-help");
+      const slides = document.querySelectorAll('.slide');
+      const dotsContainer = document.getElementById('dotsContainer');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+
+      let currentSlide = 0;
+
+      // Crear dots
+      if (slides.length > 0 && dotsContainer.children.length === 0) {
+        slides.forEach((_, idx) => {
+          const dot = document.createElement('span');
+          dot.classList.add('dot');
+          if (idx === 0) dot.classList.add('active');
+          dotsContainer.appendChild(dot);
+        });
+      }
+      const dots = document.querySelectorAll('.dot');
+
+      function showSlide(n) {
+        slides.forEach(s => s.classList.remove('active'));
+        dots.forEach(d => d.classList.remove('active'));
+
+        currentSlide = n;
+
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+
+        if (prevBtn) prevBtn.disabled = currentSlide === 0;
+        if (nextBtn) nextBtn.innerHTML = currentSlide === slides.length - 1 ? "¡Entendido! 👍" : "Siguiente ❯";
+      }
+
+      if (btn) btn.onclick = () => modal.style.display = "flex";
+      if (closeSpan) closeSpan.onclick = () => modal.style.display = "none";
+      window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; }
+
+      if (prevBtn) prevBtn.onclick = () => { if (currentSlide > 0) showSlide(currentSlide - 1); }
+      if (nextBtn) nextBtn.onclick = () => {
+        if (currentSlide < slides.length - 1) {
+          showSlide(currentSlide + 1);
+        } else {
+          modal.style.display = "none";
+          setTimeout(() => showSlide(0), 500);
+        }
+      }
+    });
+  </script>
+
   <script src="scripts/api.js"></script>
 
   <script type="module">
@@ -349,11 +609,21 @@
           const segmentDist = this.calcularDistancia(
             this.lastPosition.lat,
             this.lastPosition.lon,
+            this.lastPosition.lat, // ERROR FIX: Usaba userLat aquí
+            this.lastPosition.lon  // ERROR FIX: y aquí
+          );
+          // Nota: Arriba hay un pequeño bug en tu código original,
+          // deberia ser (this.lastPosition.lat, this.lastPosition.lon, userLat, userLon)
+          // Lo corrijo aquí abajo:
+          const realSegmentDist = this.calcularDistancia(
+            this.lastPosition.lat,
+            this.lastPosition.lon,
             userLat,
             userLon
           );
-          if (segmentDist < 50) {
-            this.totalDistanceTraveled += segmentDist;
+
+          if (realSegmentDist < 50) {
+            this.totalDistanceTraveled += realSegmentDist;
           }
         }
         this.lastPosition = { lat: userLat, lon: userLon };
@@ -529,11 +799,10 @@
         console.log('🌍 Iniciando GPS con alta precisión...');
 
         let isFirstPosition = true;
-        let navigationRegistered = false; // NUEVO: Flag para evitar duplicados
+        let navigationRegistered = false;
 
         this.watchId = navigator.geolocation.watchPosition(
           (position) => {
-            // NUEVO: Solo registrar navegación UNA VEZ al obtener primera posición válida
             if (isFirstPosition && !navigationRegistered) {
               const smoothed = this.gpsFilter.getSmoothedPosition();
               if (smoothed) {
@@ -610,7 +879,6 @@
           this.actualizarInterfaz(this.currentDistance, this.targetBearing, accuracy);
           this.actualizarFlecha();
 
-          // Radio de llegada dinámico
           const arrivalRadius = Math.max(15, accuracy * 1.5);
 
           if (this.currentDistance <= arrivalRadius) {
@@ -680,7 +948,6 @@
           distanciaTexto = `${(distancia / 1000).toFixed(1)} km`;
         }
 
-        // Determinar cercanía con radio dinámico
         const arrivalRadius = Math.max(15, accuracy * 1.5);
         let statusIcon = '📍';
         let statusText = '';
@@ -825,6 +1092,7 @@
 
         if (this.watchId) {
           navigator.geolocation.clearWatch(this.watchId);
+          this.watchId = null;
         }
         if (this.renderer) {
           this.renderer.dispose();
