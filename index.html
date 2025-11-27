@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebWay - Demo Campus</title>
-  <link rel="icon" href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
+  <link rel="icon" type="image/png" href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
   <link rel="stylesheet" href="styles/styles.css">
 </head>
 
@@ -60,7 +60,6 @@
           <p>Navegación Campus AR</p>
         </div>
       </div>
-      <button id="btnCambiarUsuario" class="btn-secondary">Cambiar Usuario</button>
       <a href="admin/dashboard.html" class="admin-btn">
         Admin
       </a>
@@ -149,14 +148,11 @@
     const errorMessage = document.getElementById('errorMessage');
 
     async function initUserSelection() {
-      // Si ya hay sesión activa, mostrar menú principal directamente
       if (arAPI.restoreSession()) {
         showMainContent();
-        initApp(); // ← Cargar app
         return;
       }
 
-      // Si no hay sesión, cargar tipos de usuario
       loadingSpinner.classList.add('active');
       const userTypes = await arAPI.getUserTypes();
       loadingSpinner.classList.remove('active');
