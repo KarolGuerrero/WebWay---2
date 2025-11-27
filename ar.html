@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AR Wayfinding - WebWay</title>
-  <link rel="icon"
-    href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
+  <link rel="icon"href="img/logou.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -462,7 +461,6 @@
     import { populateUiAndReturnPoisForAR } from './scripts/app.js';
     import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './scripts/orientation.js';
 
-    // Verificar sesión activa
     if (!window.arAPI || !window.arAPI.restoreSession()) {
       alert('No hay sesión activa. Redirigiendo...');
       window.location.href = 'index.html';
@@ -972,8 +970,6 @@
         if (this.debugDiv) {
           const smoothed = this.gpsFilter.getSmoothedPosition();
           this.debugDiv.innerHTML = `
-            Posición: ${smoothed ? smoothed.lat.toFixed(7) : 'N/A'}, ${smoothed ? smoothed.lon.toFixed(7) : 'N/A'}<br>
-            Destino: ${this.destino.lat.toFixed(7)}, ${this.destino.lon.toFixed(7)}<br>
             Distancia: ${Math.round(distancia)}m | Rumbo: ${Math.round(rumbo)}°<br>
             Heading: ${Math.round(this.currentHeading)}° | Muestras GPS: ${this.gpsFilter.positions.length}<br>
             Recorrido: ${Math.round(this.totalDistanceTraveled)}m | Radio llegada: ${Math.round(arrivalRadius)}m
