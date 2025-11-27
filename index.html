@@ -52,83 +52,81 @@
   <!-- Contenido principal -->
   <div class="main-content">
     <header>
-      <div class="header-content">
-        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
-          alt="Universidad Sergio Arboleda" class="header-logo">
-        <div class="header-text">
-          <h1>WebWay</h1>
-          <p>Navegación Campus AR</p>
+      <header>
+        <div class="header-content">
+          <h1>WebWay - Navegación Campus</h1>
+          <p>Selecciona tu destino para comenzar tu recorrido AR</p>
         </div>
-      </div>
-      <a href="admin/dashboard.html" class="admin-btn">
-        Admin
-      </a>
-    </header>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="btnCambiarUsuario" class="btn-secondary">Cambiar Usuario</button>
+          <a href="admin/dashboard.html" class="admin-btn">Admin</a>
+        </div>
+      </header>
 
-    <main>
-      <section class="selection-panel">
-        <div class="panel-header">
-          <div class="icon-wrapper">
-            <span class="icon-text">𖦏</span>
+      <main>
+        <section class="selection-panel">
+          <div class="panel-header">
+            <div class="icon-wrapper">
+              <span class="icon-text">𖦏</span>
+            </div>
+            <div>
+              <h2>Selecciona tu Destino</h2>
+              <p>Elige el lugar al que deseas navegar en el campus</p>
+            </div>
           </div>
-          <div>
-            <h2>Selecciona tu Destino</h2>
-            <p>Elige el lugar al que deseas navegar en el campus</p>
+
+          <div class="form-group">
+            <label for="destino">
+              Destino
+            </label>
+            <select id="destino">
+              <option value="">-- Selecciona un lugar --</option>
+            </select>
+          </div>
+
+          <div id="lugar-descripcion" class="lugar-descripcion">
+            <div class="description-icon-text">INFO</div>
+            <p id="descripcion-texto"></p>
+          </div>
+
+          <div class="button-group">
+            <button id="btnAR" class="btn btn-primary">
+              Iniciar Navegación AR
+            </button>
+          </div>
+        </section>
+
+        <section class="info-cards">
+          <div class="info-card">
+            <div class="info-icon-text"> 🗺️</div>
+            <h3>Navegación Precisa</h3>
+            <p>Usa GPS y giroscopio para guiarte en tiempo real</p>
+          </div>
+          <div class="info-card">
+            <div class="info-icon-text">📱</div>
+            <h3>Realidad Aumentada</h3>
+            <p>Visualiza direcciones superpuestas en tu entorno</p>
+          </div>
+          <div class="info-card">
+            <div class="info-icon-text">⚡</div>
+            <h3>Rápido y Fácil</h3>
+            <p>Encuentra tu destino sin complicaciones</p>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>WebWay AR</h4>
+            <p>Universidad Sergio Arboleda</p>
+          </div>
+          <div class="footer-section">
+            <p>&copy; 2025 Todos los derechos reservados</p>
+            <p class="footer-tech">Sistema de navegación con Giroscopio y GPS</p>
           </div>
         </div>
-
-        <div class="form-group">
-          <label for="destino">
-            Destino
-          </label>
-          <select id="destino">
-            <option value="">-- Selecciona un lugar --</option>
-          </select>
-        </div>
-
-        <div id="lugar-descripcion" class="lugar-descripcion">
-          <div class="description-icon-text">INFO</div>
-          <p id="descripcion-texto"></p>
-        </div>
-
-        <div class="button-group">
-          <button id="btnAR" class="btn btn-primary">
-            Iniciar Navegación AR
-          </button>
-        </div>
-      </section>
-
-      <section class="info-cards">
-        <div class="info-card">
-          <div class="info-icon-text"> 🗺️</div>
-          <h3>Navegación Precisa</h3>
-          <p>Usa GPS y giroscopio para guiarte en tiempo real</p>
-        </div>
-        <div class="info-card">
-          <div class="info-icon-text">📱</div>
-          <h3>Realidad Aumentada</h3>
-          <p>Visualiza direcciones superpuestas en tu entorno</p>
-        </div>
-        <div class="info-card">
-          <div class="info-icon-text">⚡</div>
-          <h3>Rápido y Fácil</h3>
-          <p>Encuentra tu destino sin complicaciones</p>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>WebWay AR</h4>
-          <p>Universidad Sergio Arboleda</p>
-        </div>
-        <div class="footer-section">
-          <p>&copy; 2025 Todos los derechos reservados</p>
-          <p class="footer-tech">Sistema de navegación con Giroscopio y GPS</p>
-        </div>
-      </div>
-    </footer>
+      </footer>
   </div>
 
   <!-- Scripts -->
@@ -336,6 +334,16 @@
 
     function initApp() {
       new App();
+
+      // Botón para cambiar de usuario
+      document.getElementById('btnCambiarUsuario')?.addEventListener('click', async () => {
+        if (confirm('¿Cerrar sesión actual y volver al menú de selección de usuario?')) {
+          await arAPI.endSession();
+          sessionStorage.clear();
+          localStorage.clear();
+          window.location.reload();
+        }
+      });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
