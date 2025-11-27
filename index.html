@@ -148,11 +148,14 @@
     const errorMessage = document.getElementById('errorMessage');
 
     async function initUserSelection() {
+      // Si ya hay sesión activa, mostrar menú principal directamente
       if (arAPI.restoreSession()) {
         showMainContent();
+        initApp(); // ← Cargar app
         return;
       }
 
+      // Si no hay sesión, cargar tipos de usuario
       loadingSpinner.classList.add('active');
       const userTypes = await arAPI.getUserTypes();
       loadingSpinner.classList.remove('active');
