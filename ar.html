@@ -201,7 +201,6 @@
     import { populateUiAndReturnPoisForAR } from './scripts/app.js';
     import { requestOrientationPermissionIfNeeded, installDeviceOrientationListener, getCurrentHeading } from './scripts/orientation.js';
 
-    // Verificar sesión activa
     if (!window.arAPI || !window.arAPI.restoreSession()) {
       alert('No hay sesión activa. Redirigiendo...');
       window.location.href = 'index.html';
