@@ -575,7 +575,7 @@
                 <div class="stat-card">
                     <h3>Total Sesiones</h3>
                     <div class="value" id="totalSessions">-</div>
-                    <div class="label">Usuarios únicos</div>
+                    <div class="label">Sesiones registradas</div>
                 </div>
                 <div class="stat-card">
                     <h3>Total Navegaciones</h3>
@@ -619,7 +619,6 @@
                             <th>POI</th>
                             <th>Categoría</th>
                             <th>Total Visitas</th>
-                            
                             <th>Tiempo Promedio</th>
                         </tr>
                     </thead>
@@ -767,7 +766,6 @@
                                 <td><strong>${poi.name}</strong></td>
                                 <td><span class="badge badge-info">${poi.category || 'N/A'}</span></td>
                                 <td>${poi.total_visits}</td>
-                                <td>${poi.unique_visitors}</td>
                                 <td>${minutes}m ${seconds}s</td>
                             </tr>
                         `;
