@@ -41,7 +41,7 @@ const pois = [
     "lat": 4.6615260954136,
     "lon": -74.0595618398411,
     "description": "Centro de innovación y emprendimiento. Espacio de coworking, salas de reuniones y área de prototipado para proyectos estudiantiles.",
-    "category": "servicios"
+    "category": "academico"
   },
   {
     "id": 8,
