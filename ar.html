@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AR Wayfinding - WebWay</title>
-  <link rel="icon" href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
+  <link rel="icon"
+    href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
@@ -186,7 +187,7 @@
     <h3 style="margin: 0 0 10px 0;">Navegación por Orientación</h3>
     <p id="status-text">Inicializando...</p>
     <div id="debug" class="debug-info"></div>
-    <button class="btn" id="btnvolver" onclick="window.location.href='index.html'">Volver</button>
+    <button class="btn" onclick="window.location.href='index.html'">Volver</button>
     <button class="btn btn-secondary" id="calibrate-btn">Calibrar Brújula</button>
   </div>
 
@@ -835,45 +836,6 @@
           video.srcObject.getTracks().forEach(track => track.stop());
         }
       }
-
-      // Nuevo método: Cleanup sin cerrar sesión
-      async cleanupWithoutEndingSession() {
-        // Si hay navegación activa y NO llegó al destino, marcar como incompleta
-        if (this.navigationActive && this.navigationStartTime) {
-          await this.completeNavigationTracking(false); // false = incompleta
-        }
-
-        // Detener GPS
-        if (this.watchId) {
-          navigator.geolocation.clearWatch(this.watchId);
-          this.watchId = null;
-        }
-
-        // Limpiar Three.js
-        if (this.renderer) {
-          this.renderer.dispose();
-        }
-
-        // Detener cámara
-        const video = document.getElementById('camera-video');
-        if (video.srcObject) {
-          video.srcObject.getTracks().forEach(track => track.stop());
-        }
-
-        // NO cerrar la sesión - mantenerla activa
-        console.log('Navegación detenida, sesión mantenida activa');
-      }
-
-      // Modificar el cleanup original para que cierre sesión
-      async cleanup() {
-        await this.cleanupWithoutEndingSession();
-
-        // Cerrar sesión completamente
-        if (window.arAPI) {
-          await window.arAPI.endSession();
-        }
-        console.log('Sesión cerrada completamente');
-      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -884,15 +846,6 @@
       if (window.orientationAR) {
         window.orientationAR.cleanup();
       }
-    });
-
-    document.getElementById('btnVolver').addEventListener('click', async () => {
-      if (window.orientationAR) {
-        // Cleanup sin cerrar sesión
-        await window.orientationAR.cleanupWithoutEndingSession();
-      }
-      // Volver al menú
-      window.location.href = 'index.html';
     });
   </script>
 </body>

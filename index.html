@@ -148,11 +148,19 @@
     const errorMessage = document.getElementById('errorMessage');
 
     async function initUserSelection() {
+      console.log('Verificando sesión existente...');
+
       if (arAPI.restoreSession()) {
+        console.log('Sesión activa restaurada');
         showMainContent();
+        await initApp();
         return;
       }
 
+      // Si no hay sesión, mostrar pantalla de selección
+      console.log('No hay sesión, mostrando selección de usuario');
+
+      // Cargar tipos de usuario
       loadingSpinner.classList.add('active');
       const userTypes = await arAPI.getUserTypes();
       loadingSpinner.classList.remove('active');
@@ -195,16 +203,23 @@
       loadingSpinner.classList.add('active');
       errorMessage.classList.remove('active');
 
+  
       const success = await arAPI.startSession(userTypeId);
 
       if (success) {
-        buttonElement.classList.add('selected');
+        // Animación de éxito
+        buttonElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        buttonElement.style.color = 'white';
+        buttonElement.querySelector('.user-type-content h3').style.color = 'white';
+        buttonElement.querySelector('.user-type-content p').style.color = 'white';
 
-        setTimeout(() => {
+        // Esperar un momento y mostrar contenido principal
+        setTimeout(async () => {
           showMainContent();
-          initApp();
-        }, 600);
+          await initApp(); // 
+        }, 500);
       } else {
+        // Error
         loadingSpinner.classList.remove('active');
         errorMessage.classList.add('active');
         document.querySelectorAll('.user-type-btn').forEach(btn => {
@@ -225,38 +240,52 @@
     class App {
       constructor() {
         this.lugares = [];
-        this.init();
       }
 
       async init() {
+        console.log('Cargando lugares...');
         try {
           await this.cargarLugares();
           this.configurarInterfaz();
+          console.log('Lugares cargados:', this.lugares.length);
         } catch (error) {
           this.mostrarError('Error al cargar los destinos: ' + error.message);
+          console.error('❌ Error en init:', error);
         }
       }
 
       async cargarLugares() {
         try {
           this.lugares = await loadPois();
+          console.log('POIs cargados desde API:', this.lugares);
         } catch (error) {
-          console.error('Error cargando lugares:', error);
+          console.error('❌ Error cargando lugares:', error);
+          // Datos de respaldo
           this.lugares = [
             { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797, "description": "Edificio principal de aulas" },
             { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924, "description": "Centro de recursos académicos" },
             { "id": 4, "name": "Bloque F", "lat": 4.6611701025415, "lon": -74.0597040270357, "description": "Edificio de ciencias" }
           ];
+          console.log('⚠️ Usando POIs de respaldo');
         }
       }
 
       configurarInterfaz() {
         const select = document.getElementById('destino');
-        if (!select) return;
+        if (!select) {
+          console.error('❌ No se encontró el select de destino');
+          return;
+        }
 
+        console.log('🔧 Configurando interfaz con', this.lugares.length, 'lugares');
         populateDestSelectInIndex(this.lugares, select);
+
         select.addEventListener('change', () => this.mostrarDescripcion());
-        document.getElementById('btnAR').addEventListener('click', () => this.irAAR());
+
+        const btnAR = document.getElementById('btnAR');
+        if (btnAR) {
+          btnAR.addEventListener('click', () => this.irAAR());
+        }
       }
 
       mostrarDescripcion() {
