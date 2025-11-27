@@ -2,180 +2,459 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebWay - Demo Campus</title>
-  <link rel="icon" href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
-  <link rel="stylesheet" href="styles/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebWay - Demo Campus</title>
+    <link rel="icon" href="https://www.usergioarboleda.edu.co/wp-content/uploads/2021/05/cropped-favicon-usa-32x32.png">
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 
 <body>
-  <!-- Pantalla de selección de tipo de usuario -->
-  <div id="userSelectionScreen" class="user-selection-screen">
-    <!-- Botón de Admin en la esquina superior derecha -->
-    <a href="admin/dashboard.html" class="admin-btn-floating">
-      Admin
-    </a>
+    <div id="userSelectionScreen" class="user-selection-screen">
+        <a href="admin/dashboard.html" class="admin-btn-floating">
+            Admin
+        </a>
 
-    <div class="selection-container">
-      <div class="selection-logo">
-        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
-          alt="Universidad Sergio Arboleda" class="logo-usa">
-        <h1>WebWay AR</h1>
-        <p>Sistema de Navegación Inteligente</p>
-      </div>
+        <div class="selection-container">
+            <div class="selection-logo">
+                <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
+                    alt="Universidad Sergio Arboleda" class="logo-usa">
+                <h1>WebWay AR</h1>
+                <p>Sistema de Navegación Inteligente</p>
+            </div>
 
-      <div class="selection-title">
-        <h2>¿Quién eres?</h2>
-        <p>Selecciona tu perfil para comenzar tu experiencia</p>
-      </div>
+            <div class="selection-title">
+                <h2>¿Quién eres?</h2>
+                <p>Selecciona tu perfil para comenzar tu experiencia</p>
+            </div>
 
-      <div class="user-type-buttons" id="userTypeButtons">
-        <!-- Los botones se cargarán dinámicamente -->
-      </div>
+            <div class="user-type-buttons" id="userTypeButtons">
+                </div>
 
-      <div id="loadingSpinner" class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Cargando perfiles...</p>
-      </div>
+            <div id="loadingSpinner" class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Cargando perfiles...</p>
+            </div>
 
-      <div id="errorMessage" class="error-message">
-        <span class="error-icon-text">⚠️</span>
-        <div>
-          <strong>Error de conexión</strong>
-          <p>No se pudo conectar al servidor. Verifica tu conexión.</p>
+            <div id="errorMessage" class="error-message">
+                <span class="error-icon-text">⚠️</span>
+                <div>
+                    <strong>Error de conexión</strong>
+                    <p>No se pudo conectar al servidor. Verifica tu conexión.</p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Contenido principal -->
-  <div class="main-content">
-    <header>
-      <div class="header-content">
-        <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
-          alt="Universidad Sergio Arboleda" class="header-logo">
-        <div class="header-text">
-          <h1>WebWay</h1>
-          <p>Navegación Campus AR</p>
+    <div class="main-content">
+        <header>
+            <div class="header-content">
+                <img src="https://www.usergioarboleda.edu.co/wp-content/uploads/2017/03/cropped-U-SERGIOV11.png"
+                    alt="Universidad Sergio Arboleda" class="header-logo">
+                <div class="header-text">
+                    <h1>WebWay</h1>
+                    <p>Navegación Campus AR</p>
+                </div>
+            </div>
+            <a href="admin/dashboard.html" class="admin-btn">
+                Admin
+            </a>
+        </header>
+
+        <main>
+            <section class="selection-panel">
+                <div class="panel-header">
+                    <div class="icon-wrapper">
+                        <span class="icon-text">𖦏</span>
+                    </div>
+                    <div>
+                        <h2>Selecciona tu Destino</h2>
+                        <p>Elige el lugar al que deseas navegar en el campus</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="destino">
+                        Destino
+                    </label>
+                    <select id="destino">
+                        <option value="">-- Selecciona un lugar --</option>
+                    </select>
+                </div>
+
+                <div id="lugar-descripcion" class="lugar-descripcion">
+                    <div class="description-icon-text">INFO</div>
+                    <p id="descripcion-texto"></p>
+                </div>
+
+                <div class="button-group">
+                    <button id="btnAR" class="btn btn-primary">
+                        Iniciar Navegación AR
+                    </button>
+                </div>
+            </section>
+
+            <section class="info-cards">
+                <div class="info-card">
+                    <div class="info-icon-text"> 🗺️</div>
+                    <h3>Navegación Precisa</h3>
+                    <p>Usa GPS y giroscopio para guiarte en tiempo real</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon-text">📱</div>
+                    <h3>Realidad Aumentada</h3>
+                    <p>Visualiza direcciones superpuestas en tu entorno</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon-text">⚡</div>
+                    <h3>Rápido y Fácil</h3>
+                    <p>Encuentra tu destino sin complicaciones</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>WebWay AR</h4>
+                    <p>Universidad Sergio Arboleda</p>
+                </div>
+                <div class="footer-section">
+                    <p>&copy; 2025 Todos los derechos reservados</p>
+                    <p class="footer-tech">Sistema de navegación con Giroscopio y GPS</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="help-floating-btn" class="help-btn">?</div>
+
+    <div id="help-modal" class="help-modal">
+        <div class="help-content">
+            <span class="close-help">&times;</span>
+
+            <div class="carousel-container">
+
+                <div class="slide active">
+                    <div class="slide-icon">👋</div>
+                    <h3>Bienvenido a WebWay</h3>
+                    <p>Tu sistema de navegación inteligente dentro del campus.</p>
+                    <p>Desliza para aprender cómo funciona la experiencia.</p>
+                </div>
+
+                <div class="slide">
+                    <div class="slide-icon">📍</div>
+                    <h3>1. Elige tu Destino</h3>
+                    <p>Selecciona el edificio o zona en el menú desplegable.</p>
+                    <p>Podrás ver información clave del lugar antes de iniciar.</p>
+                </div>
+
+                <div class="slide">
+                    <div class="slide-icon">📱</div>
+                    <h3>2. Modo Realidad Aumentada</h3>
+                    <p>Activaremos tu cámara para mostrarte el camino.</p>
+                    <p style="font-size: 0.9em; background: #f0f0f0; padding: 8px; border-radius: 8px; margin-top:5px;">
+                        <strong>¿Por qué se ve así?</strong><br>
+                        Superponemos flechas digitales sobre el mundo real para guiarte paso a paso.
+                    </p>
+                </div>
+
+                <div class="slide">
+                    <div class="slide-icon">🧭</div>
+                    <h3>3. Consejos de Uso</h3>
+                    <p>Mantén el celular en posición vertical frente a ti.</p>
+                    <p>Si la dirección falla, mueve tu celular dibujando un "8" en el aire para recalibrar la brújula.
+                    </p>
+                </div>
+
+                <div class="carousel-controls">
+                    <button id="prevBtn" class="nav-btn">❮ Anterior</button>
+                    <div class="dots-container" id="dotsContainer"></div>
+                    <button id="nextBtn" class="nav-btn">Siguiente ❯</button>
+                </div>
+            </div>
         </div>
-      </div>
-      <a href="admin/dashboard.html" class="admin-btn">
-        Admin
-      </a>
-    </header>
+    </div>
 
-    <main>
-      <section class="selection-panel">
-        <div class="panel-header">
-          <div class="icon-wrapper">
-            <span class="icon-text">𖦏</span>
-          </div>
-          <div>
-            <h2>Selecciona tu Destino</h2>
-            <p>Elige el lugar al que deseas navegar en el campus</p>
-          </div>
-        </div>
+    <style>
+        /* Botón Flotante */
+        .help-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--color-secondary, #FFC107);
+            color: var(--color-primary, #003B7A);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 60px;
+            font-size: 30px;
+            font-weight: 800;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 200000;
+            transition: all 0.3s ease;
+            border: 3px solid white;
+            font-family: Arial, sans-serif;
+        }
 
-        <div class="form-group">
-          <label for="destino">
-            Destino
-          </label>
-          <select id="destino">
-            <option value="">-- Selecciona un lugar --</option>
-          </select>
-        </div>
+        .help-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(255, 193, 7, 0.6);
+        }
 
-        <div id="lugar-descripcion" class="lugar-descripcion">
-          <div class="description-icon-text">INFO</div>
-          <p id="descripcion-texto"></p>
-        </div>
+        /* Modal Fondo */
+        .help-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 59, 122, 0.9);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
 
-        <div class="button-group">
-          <button id="btnAR" class="btn btn-primary">
-            Iniciar Navegación AR
-          </button>
-        </div>
-      </section>
+        /* Contenido del Modal */
+        .help-content {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 420px;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border-top: 6px solid var(--color-secondary, #FFC107);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-      <section class="info-cards">
-        <div class="info-card">
-          <div class="info-icon-text"> 🗺️</div>
-          <h3>Navegación Precisa</h3>
-          <p>Usa GPS y giroscopio para guiarte en tiempo real</p>
-        </div>
-        <div class="info-card">
-          <div class="info-icon-text">📱</div>
-          <h3>Realidad Aumentada</h3>
-          <p>Visualiza direcciones superpuestas en tu entorno</p>
-        </div>
-        <div class="info-card">
-          <div class="info-icon-text">⚡</div>
-          <h3>Rápido y Fácil</h3>
-          <p>Encuentra tu destino sin complicaciones</p>
-        </div>
-      </section>
-    </main>
+        .close-help {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #ccc;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
 
-    <footer>
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>WebWay AR</h4>
-          <p>Universidad Sergio Arboleda</p>
-        </div>
-        <div class="footer-section">
-          <p>&copy; 2025 Todos los derechos reservados</p>
-          <p class="footer-tech">Sistema de navegación con Giroscopio y GPS</p>
-        </div>
-      </div>
-    </footer>
-  </div>
+        .close-help:hover {
+            color: var(--color-primary, #003B7A);
+        }
 
-  <!-- Scripts -->
-  <script src="scripts/api.js"></script>
-  <script type="module">
-    import { loadPois, populateDestSelectInIndex } from './scripts/app.js';
+        /* Carrusel Slides */
+        .slide {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-height: 280px;
+        }
 
-    const userTypeIcons = {
-      'visitante': '👤',
-      'estudiante': '🎓',
-      'trabajador': '💼',
-    };
+        .slide.active {
+            display: flex;
+            animation: slideIn 0.4s ease;
+        }
 
-    const selectionScreen = document.getElementById('userSelectionScreen');
-    const userTypeButtons = document.getElementById('userTypeButtons');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const errorMessage = document.getElementById('errorMessage');
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
 
-    async function initUserSelection() {
-      if (arAPI.restoreSession()) {
-        showMainContent();
-        return;
-      }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
-      loadingSpinner.classList.add('active');
-      const userTypes = await arAPI.getUserTypes();
-      loadingSpinner.classList.remove('active');
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
 
-      if (userTypes.length === 0) {
-        errorMessage.classList.add('active');
-        return;
-      }
+            to {
+                opacity: 1;
+            }
+        }
 
-      userTypes.forEach(userType => {
-        const button = createUserTypeButton(userType);
-        userTypeButtons.appendChild(button);
-      });
-    }
+        .slide-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+            background: #FFF9E6;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
 
-    function createUserTypeButton(userType) {
-      const button = document.createElement('div');
-      button.className = 'user-type-btn';
-      button.onclick = () => selectUserType(userType.id, button);
+        .slide h3 {
+            color: var(--color-primary, #003B7A);
+            margin-bottom: 15px;
+            font-weight: 800;
+            font-size: 22px;
+        }
 
-      const icon = userTypeIcons[userType.type_name.toLowerCase()] || 'U';
+        .slide p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
 
-      button.innerHTML = `
+        /* Controles */
+        .carousel-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--color-primary, #003B7A);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 10px;
+            transition: opacity 0.3s;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .dots-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: #ddd;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background-color: var(--color-secondary, #FFC107);
+            width: 12px;
+            height: 12px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById("help-modal");
+            const btn = document.getElementById("help-floating-btn");
+            const closeSpan = document.querySelector(".close-help");
+            const slides = document.querySelectorAll('.slide');
+            const dotsContainer = document.getElementById('dotsContainer');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            let currentSlide = 0;
+
+            // Crear indicadores (dots)
+            if (slides.length > 0 && dotsContainer.children.length === 0) {
+                slides.forEach((_, idx) => {
+                    const dot = document.createElement('span');
+                    dot.classList.add('dot');
+                    if (idx === 0) dot.classList.add('active');
+                    dotsContainer.appendChild(dot);
+                });
+            }
+            const dots = document.querySelectorAll('.dot');
+
+            function showSlide(n) {
+                slides.forEach(s => s.classList.remove('active'));
+                dots.forEach(d => d.classList.remove('active'));
+
+                currentSlide = n;
+
+                if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+                if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+
+                // Lógica botones
+                if (prevBtn) prevBtn.disabled = currentSlide === 0;
+                if (nextBtn) nextBtn.innerHTML = currentSlide === slides.length - 1 ? "¡Entendido! 👍" : "Siguiente ❯";
+            }
+
+            // Eventos Abrir/Cerrar
+            if (btn) btn.onclick = () => modal.style.display = "flex";
+            if (closeSpan) closeSpan.onclick = () => modal.style.display = "none";
+            window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; }
+
+            // Eventos Navegación
+            if (prevBtn) prevBtn.onclick = () => { if (currentSlide > 0) showSlide(currentSlide - 1); }
+            if (nextBtn) nextBtn.onclick = () => {
+                if (currentSlide < slides.length - 1) {
+                    showSlide(currentSlide + 1);
+                } else {
+                    modal.style.display = "none";
+                    setTimeout(() => showSlide(0), 500); // Resetear al principio
+                }
+            }
+        });
+    </script>
+    <script src="scripts/api.js"></script>
+    <script type="module">
+        import { loadPois, populateDestSelectInIndex } from './scripts/app.js';
+
+        const userTypeIcons = {
+            'visitante': '👤',
+            'estudiante': '🎓',
+            'trabajador': '💼',
+        };
+
+        const selectionScreen = document.getElementById('userSelectionScreen');
+        const userTypeButtons = document.getElementById('userTypeButtons');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+
+        async function initUserSelection() {
+            if (arAPI.restoreSession()) {
+                showMainContent();
+                return;
+            }
+
+            loadingSpinner.classList.add('active');
+            const userTypes = await arAPI.getUserTypes();
+            loadingSpinner.classList.remove('active');
+
+            if (userTypes.length === 0) {
+                errorMessage.classList.add('active');
+                return;
+            }
+
+            userTypes.forEach(userType => {
+                const button = createUserTypeButton(userType);
+                userTypeButtons.appendChild(button);
+            });
+        }
+
+        function createUserTypeButton(userType) {
+            const button = document.createElement('div');
+            button.className = 'user-type-btn';
+            button.onclick = () => selectUserType(userType.id, button);
+
+            const icon = userTypeIcons[userType.type_name.toLowerCase()] || 'U';
+
+            button.innerHTML = `
         <div class="user-type-icon">${icon}</div>
         <div class="user-type-content">
           <h3>${capitalizeFirst(userType.type_name)}</h3>
@@ -184,161 +463,161 @@
         <div class="user-type-arrow">›</div>
       `;
 
-      return button;
-    }
+            return button;
+        }
 
-    async function selectUserType(userTypeId, buttonElement) {
-      document.querySelectorAll('.user-type-btn').forEach(btn => {
-        btn.classList.add('loading');
-      });
+        async function selectUserType(userTypeId, buttonElement) {
+            document.querySelectorAll('.user-type-btn').forEach(btn => {
+                btn.classList.add('loading');
+            });
 
-      loadingSpinner.classList.add('active');
-      errorMessage.classList.remove('active');
+            loadingSpinner.classList.add('active');
+            errorMessage.classList.remove('active');
 
-      const success = await arAPI.startSession(userTypeId);
+            const success = await arAPI.startSession(userTypeId);
 
-      if (success) {
-        buttonElement.classList.add('selected');
+            if (success) {
+                buttonElement.classList.add('selected');
 
-        setTimeout(() => {
-          showMainContent();
-          initApp();
-        }, 600);
-      } else {
-        loadingSpinner.classList.remove('active');
-        errorMessage.classList.add('active');
-        document.querySelectorAll('.user-type-btn').forEach(btn => {
-          btn.classList.remove('loading');
+                setTimeout(() => {
+                    showMainContent();
+                    initApp();
+                }, 600);
+            } else {
+                loadingSpinner.classList.remove('active');
+                errorMessage.classList.add('active');
+                document.querySelectorAll('.user-type-btn').forEach(btn => {
+                    btn.classList.remove('loading');
+                });
+            }
+        }
+
+        function showMainContent() {
+            selectionScreen.classList.add('hidden');
+            document.body.classList.add('session-active');
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        class App {
+            constructor() {
+                this.lugares = [];
+                this.init();
+            }
+
+            async init() {
+                try {
+                    await this.cargarLugares();
+                    this.configurarInterfaz();
+                } catch (error) {
+                    this.mostrarError('Error al cargar los destinos: ' + error.message);
+                }
+            }
+
+            async cargarLugares() {
+                try {
+                    this.lugares = await loadPois();
+                } catch (error) {
+                    console.error('Error cargando lugares:', error);
+                    this.lugares = [
+                        { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797, "description": "Edificio principal de aulas" },
+                        { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924, "description": "Centro de recursos académicos" },
+                        { "id": 4, "name": "Bloque F", "lat": 4.6611701025415, "lon": -74.0597040270357, "description": "Edificio de ciencias" }
+                    ];
+                }
+            }
+
+            configurarInterfaz() {
+                const select = document.getElementById('destino');
+                if (!select) return;
+
+                populateDestSelectInIndex(this.lugares, select);
+                select.addEventListener('change', () => this.mostrarDescripcion());
+                document.getElementById('btnAR').addEventListener('click', () => this.irAAR());
+            }
+
+            mostrarDescripcion() {
+                const select = document.getElementById('destino');
+                const destinoId = select.value;
+                const contenedor = document.getElementById('lugar-descripcion');
+                const textoEl = document.getElementById('descripcion-texto');
+
+                if (!destinoId) {
+                    contenedor.style.display = 'none';
+                    return;
+                }
+
+                const destino = this.lugares.find(l => l.id == destinoId);
+                if (destino && destino.description) {
+                    textoEl.textContent = destino.description;
+                    contenedor.style.display = 'block';
+
+                    // NUEVO: Registrar búsqueda (NO navegación)
+                    if (window.arAPI && window.arAPI.hasActiveSession()) {
+                        window.arAPI.registerSearch(parseInt(destinoId));
+                    }
+                } else {
+                    contenedor.style.display = 'none';
+                }
+            }
+
+            obtenerDestinoSeleccionado() {
+                const select = document.getElementById('destino');
+                const destinoId = select.value;
+
+                if (!destinoId) {
+                    this.mostrarError('Por favor selecciona un destino');
+                    return null;
+                }
+
+                const destino = this.lugares.find(l => l.id == destinoId);
+                if (!destino) {
+                    this.mostrarError('Destino no encontrado');
+                    return null;
+                }
+
+                return destino;
+            }
+
+            irAAR() {
+                const destino = this.obtenerDestinoSeleccionado();
+                if (!destino) return;
+
+                localStorage.setItem('ar-destino', JSON.stringify(destino));
+                window.location.href = `ar.html?dest=${destino.id}`;
+            }
+
+            mostrarError(mensaje) {
+                const errorExistente = document.querySelector('.error-toast');
+                if (errorExistente) errorExistente.remove();
+
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-toast';
+                errorDiv.innerHTML = `
+        <span class="error-icon-text">!</span>
+        <span>${mensaje}</span>
+      `;
+
+                document.body.appendChild(errorDiv);
+
+                setTimeout(() => errorDiv.classList.add('show'), 10);
+                setTimeout(() => {
+                    errorDiv.classList.remove('show');
+                    setTimeout(() => errorDiv.remove(), 300);
+                }, 5000);
+            }
+        }
+
+        function initApp() {
+            new App();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initUserSelection();
         });
-      }
-    }
-
-    function showMainContent() {
-      selectionScreen.classList.add('hidden');
-      document.body.classList.add('session-active');
-    }
-
-    function capitalizeFirst(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    class App {
-      constructor() {
-        this.lugares = [];
-        this.init();
-      }
-
-      async init() {
-        try {
-          await this.cargarLugares();
-          this.configurarInterfaz();
-        } catch (error) {
-          this.mostrarError('Error al cargar los destinos: ' + error.message);
-        }
-      }
-
-      async cargarLugares() {
-        try {
-          this.lugares = await loadPois();
-        } catch (error) {
-          console.error('Error cargando lugares:', error);
-          this.lugares = [
-            { "id": 0, "name": "Bloque A", "lat": 4.6609819622582, "lon": -74.0596161549797, "description": "Edificio principal de aulas" },
-            { "id": 1, "name": "Bloque B", "lat": 4.6612256555812, "lon": -74.0595379523924, "description": "Centro de recursos académicos" },
-            { "id": 4, "name": "Bloque F", "lat": 4.6611701025415, "lon": -74.0597040270357, "description": "Edificio de ciencias" }
-          ];
-        }
-      }
-
-      configurarInterfaz() {
-        const select = document.getElementById('destino');
-        if (!select) return;
-
-        populateDestSelectInIndex(this.lugares, select);
-        select.addEventListener('change', () => this.mostrarDescripcion());
-        document.getElementById('btnAR').addEventListener('click', () => this.irAAR());
-      }
-
-      mostrarDescripcion() {
-        const select = document.getElementById('destino');
-        const destinoId = select.value;
-        const contenedor = document.getElementById('lugar-descripcion');
-        const textoEl = document.getElementById('descripcion-texto');
-
-        if (!destinoId) {
-          contenedor.style.display = 'none';
-          return;
-        }
-
-        const destino = this.lugares.find(l => l.id == destinoId);
-        if (destino && destino.description) {
-          textoEl.textContent = destino.description;
-          contenedor.style.display = 'block';
-
-          // NUEVO: Registrar búsqueda (NO navegación)
-          if (window.arAPI && window.arAPI.hasActiveSession()) {
-            window.arAPI.registerSearch(parseInt(destinoId));
-          }
-        } else {
-          contenedor.style.display = 'none';
-        }
-      }
-
-      obtenerDestinoSeleccionado() {
-        const select = document.getElementById('destino');
-        const destinoId = select.value;
-
-        if (!destinoId) {
-          this.mostrarError('Por favor selecciona un destino');
-          return null;
-        }
-
-        const destino = this.lugares.find(l => l.id == destinoId);
-        if (!destino) {
-          this.mostrarError('Destino no encontrado');
-          return null;
-        }
-
-        return destino;
-      }
-
-      irAAR() {
-        const destino = this.obtenerDestinoSeleccionado();
-        if (!destino) return;
-
-        localStorage.setItem('ar-destino', JSON.stringify(destino));
-        window.location.href = `ar.html?dest=${destino.id}`;
-      }
-
-      mostrarError(mensaje) {
-        const errorExistente = document.querySelector('.error-toast');
-        if (errorExistente) errorExistente.remove();
-
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-toast';
-        errorDiv.innerHTML = `
-          <span class="error-icon-text">!</span>
-          <span>${mensaje}</span>
-        `;
-
-        document.body.appendChild(errorDiv);
-
-        setTimeout(() => errorDiv.classList.add('show'), 10);
-        setTimeout(() => {
-          errorDiv.classList.remove('show');
-          setTimeout(() => errorDiv.remove(), 300);
-        }, 5000);
-      }
-    }
-
-    function initApp() {
-      new App();
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      initUserSelection();
-    });
-  </script>
+    </script>
 </body>
 
 </html>
